@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:id="@+id/connectBtn" android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Disconnect"
+        android:id="@+id/disconnectBtn" android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UP"
+        android:id="@+id/upBtn"
+        android:layout_alignParentTop="true" android:layout_alignStart="@+id/backwardBtn"
+        android:layout_alignEnd="@+id/backwardBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forward"
+        android:id="@+id/forwardBtn"
+        android:layout_below="@+id/upBtn" android:layout_alignStart="@+id/upBtn"
+        android:layout_alignEnd="@+id/upBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Down"
+        android:id="@+id/downBtn" android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@+id/backwardBtn" android:layout_alignStart="@+id/backwardBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Backward"
+        android:id="@+id/backwardBtn" android:layout_above="@+id/downBtn"
+        android:layout_centerHorizontal="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take Off"
+        android:id="@+id/takeOffBtn"
+        android:layout_alignParentBottom="true" android:layout_toEndOf="@+id/ftrimBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Landing"
+        android:id="@+id/landingBtn" android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rotate R"
+        android:id="@+id/rotateRightBtn" android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Right"
+        android:id="@+id/rightBtn" android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/rotateRightBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rotate L"
+        android:id="@+id/rotateLeftBtn" android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Left"
+        android:id="@+id/leftBtn" android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/rotateLeftBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hover"
+        android:id="@+id/hoverBtn"
+        android:layout_alignEnd="@+id/backwardBtn" android:layout_alignBottom="@+id/rightBtn"
+        android:layout_alignTop="@+id/rightBtn" android:layout_alignStart="@+id/forwardBtn"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ftrim"
+        android:id="@+id/ftrimBtn"
+        android:layout_below="@+id/backwardBtn" android:layout_alignParentStart="true"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Autonomy"
+        android:id="@+id/autonomyBtn" android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/disconnectBtn"/>
+</RelativeLayout>
