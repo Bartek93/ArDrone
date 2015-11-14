@@ -35,7 +35,7 @@ public class ARDroneAPI
 	public void hovering()
 	{
 		try
-		{			
+		{
 			ardrone.send_pcmd(0, 0, 0, 0, 0);
 		}
 		catch (Exception e)
@@ -112,7 +112,7 @@ public class ARDroneAPI
 		}
 	}
 
-	//yaw left
+	// yaw left
 	public void rotatel()
 	{
 		try
@@ -126,7 +126,7 @@ public class ARDroneAPI
 		}
 	}
 
-	//yaw right
+	// yaw right
 	public void rotater()
 	{
 		try
@@ -165,7 +165,7 @@ public class ARDroneAPI
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void goRight()
 	{
 		try
@@ -178,7 +178,7 @@ public class ARDroneAPI
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void goLeft()
 	{
 		try

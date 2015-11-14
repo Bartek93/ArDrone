@@ -120,11 +120,11 @@ public class ARDrone
 
 	public ARDrone(String ip) throws Exception
 	{
-		//----------------------------------------------------------------------//
-		//----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
 		Log.i("ARDrone", "Wejscie w kontruktor");
-		//----------------------------------------------------------------------//
-		//----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
 
 		StringTokenizer st = new StringTokenizer(ip, ".");
 
@@ -139,17 +139,16 @@ public class ARDrone
 		else
 		{
 			Log.i("ARDrone", "IP:" + ip);
-			//System.out.println("Incorrect IP address format: " + ip);
+			// System.out.println("Incorrect IP address format: " + ip);
 			System.exit(-1);
 		}
-		//----------------------------------------------------------------------//
-		//----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
 		Log.i("ARDrone", "IP:" + ip);
-		//----------------------------------------------------------------------//
-		//----------------------------------------------------------------------//
-		
+		// ----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
 
-		//System.out.println("IP: " + ip);
+		// System.out.println("IP: " + ip);
 		inet_addr = InetAddress.getByAddress(ip_bytes);
 
 		ByteBuffer bb = ByteBuffer.allocate(4);
@@ -158,12 +157,12 @@ public class ARDrone
 
 		socket_at = new DatagramSocket(ARDrone.AT_PORT);
 		socket_at.setSoTimeout(3000);
-		
-		//----------------------------------------------------------------------//
-		//----------------------------------------------------------------------//
-		Log.i("ARDrone", "Speed:"+speed);
-		//----------------------------------------------------------------------//
-		//----------------------------------------------------------------------//
+
+		// ----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
+		Log.i("ARDrone", "Speed:" + speed);
+		// ----------------------------------------------------------------------//
+		// ----------------------------------------------------------------------//
 
 		send_at_cmd("AT*COMWDG=" + get_seq());
 		Thread.sleep(INTERVAL);
@@ -189,10 +188,10 @@ public class ARDrone
 																					// 2:MAX
 		Thread.sleep(INTERVAL);
 		send_at_cmd("AT*CONFIG=" + get_seq() + ",\"general:navdata_demo\",\"TRUE\"");
-		
+
 		Thread.sleep(INTERVAL);
 		send_at_cmd("AT*CONFIG=" + get_seq() + ",\"general:video_enable\",\"TRUE\"");
-		
+
 		Thread.sleep(INTERVAL);
 		// send_at_cmd("AT*CONFIG=" + get_seq() +
 		// ",\"network:owner_mac\",\"00:18:DE:9D:E9:5D\""); //my PC
@@ -243,7 +242,7 @@ public class ARDrone
 		int tmp = 0, n = 0;
 
 		Log.i("ARDrone", "get_int(): data = " + byte2hex(data, offset, 4));
-		//System.out.println("get_int(): data = " + byte2hex(data, offset, 4));
+		// System.out.println("get_int(): data = " + byte2hex(data, offset, 4));
 		for (int i = 3; i >= 0; i--)
 		{
 			n <<= 8;
@@ -263,7 +262,7 @@ public class ARDrone
 	{
 
 		Log.i("ARDrone", "speed: " + speed);
-		//System.out.println("Speed: " + speed);
+		// System.out.println("Speed: " + speed);
 		send_at_cmd("AT*PCMD=" + get_seq() + "," + enable + "," + intOfFloat(pitch) + "," + intOfFloat(roll) + "," + intOfFloat(gaz) + ","
 				+ intOfFloat(yaw));
 	}
@@ -278,7 +277,7 @@ public class ARDrone
 	public synchronized void send_at_cmd(String at_cmd) throws Exception
 	{
 		Log.i("ARDrone", "send_at_cmd:" + at_cmd);
-		//System.out.println("AT command: " + at_cmd);
+		// System.out.println("AT command: " + at_cmd);
 		at_cmd_last = at_cmd;
 		byte[] buf_snd = (at_cmd + "\r").getBytes();
 		final DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.AT_PORT);
@@ -316,11 +315,11 @@ public class ARDrone
 
 		public NavData(ARDrone ardrone, InetAddress inet_addr) throws Exception
 		{
-			//----------------------------------------------------------------------//
-			//----------------------------------------------------------------------//
+			// ----------------------------------------------------------------------//
+			// ----------------------------------------------------------------------//
 			Log.i("NavData", "Wejœcie w kontruktor");
-			//----------------------------------------------------------------------//
-			//----------------------------------------------------------------------//
+			// ----------------------------------------------------------------------//
+			// ----------------------------------------------------------------------//
 			this.ardrone = ardrone;
 			this.inet_addr = inet_addr;
 
@@ -337,9 +336,10 @@ public class ARDrone
 				byte[] buf_snd =
 				{ 0x01, 0x00, 0x00, 0x00 };
 				DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.NAVDATA_PORT);
-				socket_nav.send(packet_snd);				
+				socket_nav.send(packet_snd);
 				Log.i("NavData", "Wys³ano trigger do portu UDP= " + ARDrone.NAVDATA_PORT);
-				//System.out.println("Sent trigger flag to UDP port " + ARDrone.NAVDATA_PORT);
+				// System.out.println("Sent trigger flag to UDP port " +
+				// ARDrone.NAVDATA_PORT);
 
 				ardrone.send_at_cmd("AT*CONFIG=" + ardrone.get_seq() + ",\"general:navdata_demo\",\"TRUE\"");
 
@@ -358,16 +358,21 @@ public class ARDrone
 						if (cnt >= 5)
 						{
 							cnt = 0;
-							
-						     Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
 
-				             Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ=" + ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE)/1000) + "m");
-				           
-							
-							//System.out.println("NavData Received: " + packet_rcv.getLength() + " bytes");
+							Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
+
+							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ="
+									+ ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+
+							// System.out.println("NavData Received: " +
+							// packet_rcv.getLength() + " bytes");
 							// System.out.println(ARDrone.byte2hex(buf_rcv, 0,
 							// packet_rcv.getLength()));
-							//System.out.println("Battery: " + ARDrone.get_int(buf_rcv, ARDrone.NAVDATA_BATTERY) + "%, Altitude: " + ((float) ARDrone.get_int(buf_rcv, ARDrone.NAVDATA_ALTITUDE) / 1000) + "m");
+							// System.out.println("Battery: " +
+							// ARDrone.get_int(buf_rcv, ARDrone.NAVDATA_BATTERY)
+							// + "%, Altitude: " + ((float)
+							// ARDrone.get_int(buf_rcv,
+							// ARDrone.NAVDATA_ALTITUDE) / 1000) + "m");
 						}
 					}
 					catch (SocketTimeoutException ex3)
