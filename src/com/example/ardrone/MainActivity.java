@@ -19,9 +19,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.renderscript.Sampler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 import ioioservice.ARDroneIOIOService;
 
 public class MainActivity extends Activity implements LocationListener, SensorEventListener
@@ -40,18 +43,38 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private Button rotateLeftBtn;
 	private Button rightBtn;
 	private Button rotateRightBtn;
+	private Button autonomyBtn;
+	private Button stopBtn;
+
+	public TextView textViewSensor1;
+
+	private static final int SAFE_DISTANCE = 50; // in cm
 
 	private ARDroneAPI drone;
 	private LocationManager mLocationManager;
 	private SensorManager mSensorManager;
 	private Location mCurrentLocation;
 	private Location mTargetLocation;
-	private boolean mStarted = false;
-	private double mOrientation;
 
+	private double mOrientation;
 	protected ARDroneIOIOService mService;
+
 	protected boolean mBound = false;
-	public int distance1;
+	private boolean mStarted = false;
+	private boolean permToAutonomy = true;
+	private boolean permToHover = true;
+	private boolean permToGoForward = true;
+
+	private int sensorDistanceFront;
+	private int sensorDistanceRight;
+	private int sensorDistanceLeft;
+
+	private enum State
+	{
+		Default, Hover, Forward, Backward, Right, Left
+	};
+
+	private State state = State.Default;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -90,6 +113,10 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		rotateLeftBtn = (Button) findViewById(R.id.rotateLeftBtn);
 		rightBtn = (Button) findViewById(R.id.rightBtn);
 		rotateRightBtn = (Button) findViewById(R.id.rotateRightBtn);
+		autonomyBtn = (Button) findViewById(R.id.autonomyBtn);
+		stopBtn = (Button) findViewById(R.id.stopBtn);
+
+		textViewSensor1 = (TextView) findViewById(R.id.textViewSensor1);
 
 		init();
 	}
@@ -104,7 +131,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			ARDroneIOIOService.LocalBinder binder = (ARDroneIOIOService.LocalBinder) service;
 			mService = binder.getService();
 			mBound = true;
-			distance1 = mService.getsensorDistance1();
+
+			sensorDistanceFront = mService.getSensorDistanceFront();
+
+			if (mService.isPermToGetDistance1And2())
+			{
+				sensorDistanceRight = mService.getSensorDistanceRight();
+				sensorDistanceLeft = mService.getSensorDistanceLeft();
+			}
 		}
 
 		@Override
@@ -130,6 +164,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		rotateLeftBtn.setOnClickListener(mClickListener);
 		rightBtn.setOnClickListener(mClickListener);
 		rotateRightBtn.setOnClickListener(mClickListener);
+		autonomyBtn.setOnClickListener(mClickListener);
+		stopBtn.setOnClickListener(mClickListener);
 	}
 
 	public OnClickListener mClickListener = new OnClickListener()
@@ -238,10 +274,179 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					drone.rotater();
 					break;
 				}
+				case R.id.autonomyBtn:
+				{
+					Log.i("OnClickListener", "autonomy !!!");
+
+					new Thread()
+					{
+						@Override
+						public void run()
+						{
+							Log.i("MainActivity", "Autonomy");
+
+							while (true)
+							{
+
+								sensorDistanceFront = mService.getSensorDistanceFront();
+
+								if (mService.isPermToGetDistance1And2())
+								{
+									sensorDistanceRight = mService.getSensorDistanceRight();
+									sensorDistanceLeft = mService.getSensorDistanceLeft();
+								}
+
+								// Log.d("MainActivity", "Odleglosc sensor1:" +
+								// distance1);
+
+								if (isPermToAutonomy())
+								{
+									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
+									
+									autonomy();
+									
+									if(mService.isPermToGetDistance1And2())
+									{
+										holdSafePositionAutonomy();
+									}
+									
+									updateViews();
+								}
+							}
+						}
+					}.start();
+					break;
+				}
+				case R.id.stopBtn:
+				{
+					Log.i("OnClickListener", "stop !!!");
+					setPermToAutonomy(false);
+					drone.hovering();
+					break;
+				}
 
 			}
 		}
 	};
+
+	private void autonomy()
+	{
+
+		if (permToGoForward)
+		{
+			if (sensorDistanceFront > SAFE_DISTANCE)
+			{
+				permToHover = true;
+
+				if (state != State.Forward)
+				{
+					Log.d("MainActivity", "Autonomy goForward");
+					// drone.goForward();
+					state = State.Forward;
+				}
+			}
+		}
+
+		if (permToHover)
+		{
+			if (sensorDistanceFront < SAFE_DISTANCE)
+			{
+				if (state != State.Hover)
+				{
+					Log.d("MainActivity", "Autonomy hovering");
+					// drone.hovering();
+					state = State.Hover;
+				}
+			}
+		}
+
+		if (sensorDistanceFront < 20)
+		{
+			if (state != State.Backward)
+			{
+				Log.d("MainActivity", "Autonomy goBackward");
+				permToHover = false;
+				// drone.goBackward();
+				state = State.Backward;
+			}
+		}
+	}
+
+	private void holdSafePositionAutonomy()
+	{
+		holdSafeFrontPosition();
+		holdSafeRightPosition();
+		holdSafeLeftPosition();
+
+		checkIfIsSafe();
+	}
+
+	private void holdSafeFrontPosition()
+	{
+		if (sensorDistanceFront < SAFE_DISTANCE)
+		{
+			if (state != State.Backward)
+			{
+				Log.d("MainActivity", "Autonomy goBackward");
+				drone.goBackward();
+				state = State.Backward;
+			}
+		}
+	}
+
+	private void holdSafeRightPosition()
+	{
+		if (sensorDistanceRight < SAFE_DISTANCE)
+		{
+			if (state != State.Left)
+			{
+				Log.d("MainActivity", "Autonomy goLeft");
+				drone.goLeft();
+				state = State.Left;
+			}
+		}
+	}
+
+	private void holdSafeLeftPosition()
+	{
+		if (sensorDistanceLeft < SAFE_DISTANCE)
+		{
+			if (state != State.Right)
+			{
+				Log.d("MainActivity", "Autonomy goRight");
+				drone.goRight();
+				state = State.Right;
+			}
+		}
+	}
+	
+	private void checkIfIsSafe()
+	{
+		if (state == State.Backward)
+		{
+			if (sensorDistanceFront > SAFE_DISTANCE)
+			{
+				drone.hovering();
+				state = State.Hover;
+			}
+		}
+		else if (state == State.Left)
+		{
+			if (sensorDistanceRight > SAFE_DISTANCE)
+			{
+				drone.hovering();
+				state = State.Hover;
+			}
+		}
+		else if (state == State.Right)
+		{
+			if (sensorDistanceLeft > SAFE_DISTANCE)
+			{
+				drone.hovering();
+				state = State.Hover;
+			}
+		}
+	}
 
 	@Override
 	protected void onResume()
@@ -344,6 +549,46 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	public void onSensorChanged(SensorEvent event)
 	{
 		mOrientation = event.values[0];
+	}
+
+	public boolean isPermToAutonomy()
+	{
+		return permToAutonomy;
+	}
+
+	public void setPermToAutonomy(boolean permToAutonomy)
+	{
+		this.permToAutonomy = permToAutonomy;
+	}
+
+	public void toast(final String message)
+	{
+		final Context context = this;
+		runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+			}
+		});
+	}
+
+	private void showVersions2(String title)
+	{
+		toast(String.format("%s\n", title));
+	}
+
+	private void updateViews()
+	{
+		runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				textViewSensor1.setText(String.valueOf(sensorDistanceFront));
+			}
+		});
 	}
 
 }

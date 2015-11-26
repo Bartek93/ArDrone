@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="17"
         android:targetSdkVersion="21" />
     
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -36,14 +36,12 @@
         </activity>
         
         <service android:name="ioioservice.ARDroneIOIOService">
-			<intent-filter>
-				<action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-			</intent-filter>
-			<meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
-				android:resource="@xml/accessory_filter" />
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
 		</service>
     </application>
 

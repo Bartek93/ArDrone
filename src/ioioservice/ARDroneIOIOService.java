@@ -1,12 +1,9 @@
 package ioioservice;
 
-import android.R;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -21,15 +18,13 @@ import ioio.lib.util.android.IOIOService;
 
 public class ARDroneIOIOService extends IOIOService
 {
-
-	private Handler mHandler = new Handler();
 	private final IBinder mBinder = new LocalBinder();
-	private int sensorDistance1;
-
-	public int getsensorDistance1()
-	{
-		return sensorDistance1;
-	}
+	
+	private int sensorDistanceFront;
+	private int sensorDistanceRight;
+	private int sensorDistanceLeft;
+	
+	private boolean isPermToGetDistance1And2 = false;
 
 	public class LocalBinder extends Binder
 	{
@@ -60,21 +55,43 @@ public class ARDroneIOIOService extends IOIOService
 	{
 		return new BaseIOIOLooper()
 		{
-
 			private DigitalOutput led_;
 
-			private DigitalOutput triggerPin_;
-			private PulseInput echoPin_;
-			private int echoSecondsSensor1;
-			private int echoDistanceCmSensor1;
+			private DigitalOutput triggerPin_1;
+			private PulseInput echoPin_1;
+			private int echoSecondsSensorFront;
+			private int echoDistanceCmSensorFront;
+			
+			private DigitalOutput triggerPin_2;
+			private PulseInput echoPin_2;
+			private int echoSecondsSensorRight;
+			private int echoDistanceCmSensorRight;
+			
+			private DigitalOutput triggerPin_3;
+			private PulseInput echoPin_3;
+			private int echoSecondsSensorLeft;
+			private int echoDistanceCmSensorLeft;
+			
 
 			@Override
 			protected void setup() throws ConnectionLostException, InterruptedException
 			{
+				//showVersions2("IOIO connected!");
+				
 				led_ = ioio_.openDigitalOutput(IOIO.LED_PIN);
 
-				triggerPin_ = ioio_.openDigitalOutput(36);
-				echoPin_ = ioio_.openPulseInput(new DigitalInput.Spec(35), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+				echoPin_1 = ioio_.openPulseInput(new DigitalInput.Spec(9), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+				triggerPin_1 = ioio_.openDigitalOutput(10);				
+				
+				if(isPermToGetDistance1And2)
+				{					
+					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(12), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+					triggerPin_2 = ioio_.openDigitalOutput(13);
+					
+					
+					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(15), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+					triggerPin_3 = ioio_.openDigitalOutput(16);
+				}								
 			}
 
 			@Override
@@ -82,25 +99,43 @@ public class ARDroneIOIOService extends IOIOService
 			{
 				led_.write(true);
 				distances();
-
 			}
 
 			public void distances() throws ConnectionLostException, InterruptedException
 			{
-				triggerPin_.write(false);
-
+				triggerPin_1.write(false);
 				Thread.sleep(5);
-
-				triggerPin_.write(true);
-
+				triggerPin_1.write(true);
 				Thread.sleep(1);
+				triggerPin_1.write(false);
 
-				triggerPin_.write(false);
+				echoSecondsSensorFront = (int) (echoPin_1.getDuration() * 1000 * 1000);
+				echoDistanceCmSensorFront = echoSecondsSensorFront / 58;
+				sensorDistanceFront = echoDistanceCmSensorFront;
+//				Log.d("IOIOSensor", "Odleglosc sensor1:" + echoDistanceCmSensor1);
+				
+				if(isPermToGetDistance1And2)
+				{
+					triggerPin_2.write(false);
+					Thread.sleep(5);
+					triggerPin_2.write(true);
+					Thread.sleep(1);
+					triggerPin_2.write(false);
 
-				echoSecondsSensor1 = (int) (echoPin_.getDuration() * 1000 * 1000);
-				echoDistanceCmSensor1 = echoSecondsSensor1 / 58;
-				sensorDistance1 = echoDistanceCmSensor1;
-				Log.d("IOIOSensor", "Odleglosc sensor1:" + echoDistanceCmSensor1);
+					echoSecondsSensorRight = (int) (echoPin_2.getDuration() * 1000 * 1000);
+					echoDistanceCmSensorRight = echoSecondsSensorRight / 58;
+					sensorDistanceRight = echoDistanceCmSensorRight;
+					
+					triggerPin_3.write(false);
+					Thread.sleep(5);
+					triggerPin_3.write(true);
+					Thread.sleep(1);
+					triggerPin_3.write(false);
+
+					echoSecondsSensorLeft = (int) (echoPin_3.getDuration() * 1000 * 1000);
+					echoDistanceCmSensorLeft = echoSecondsSensorLeft / 58;
+					sensorDistanceLeft = echoDistanceCmSensorLeft;
+				}
 
 				Thread.sleep(20);
 			}
@@ -111,7 +146,11 @@ public class ARDroneIOIOService extends IOIOService
 	public void onStart(Intent intent, int startId)
 	{
 		super.onStart(intent, startId);
-		sensorDistance1 = 0;
+		
+		sensorDistanceFront = 0;
+		sensorDistanceRight = 0;
+		sensorDistanceLeft = 0;
+		
 		Log.d("Service", "Start service");
 		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		if (intent != null && intent.getAction() != null && intent.getAction().equals("stop"))
@@ -146,5 +185,28 @@ public class ARDroneIOIOService extends IOIOService
 			 */
 		}
 	}
+    
+	public int getSensorDistanceFront()
+	{
+		return sensorDistanceFront;
+	}
 
+	public int getSensorDistanceRight()
+	{
+		return sensorDistanceRight;
+	}
+
+	public int getSensorDistanceLeft()
+	{
+		return sensorDistanceLeft;
+	}
+
+
+
+
+
+	public boolean isPermToGetDistance1And2()
+	{
+		return isPermToGetDistance1And2;
+	}
 }
