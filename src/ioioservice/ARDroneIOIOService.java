@@ -24,7 +24,7 @@ public class ARDroneIOIOService extends IOIOService
 	private int sensorDistanceRight;
 	private int sensorDistanceLeft;
 	
-	private boolean isPermToGetDistance1And2 = false;
+	private boolean isPermToGetDistance1And2 = true;
 
 	public class LocalBinder extends Binder
 	{
@@ -78,26 +78,28 @@ public class ARDroneIOIOService extends IOIOService
 			{
 				//showVersions2("IOIO connected!");
 				
-				led_ = ioio_.openDigitalOutput(IOIO.LED_PIN);
+				//led_ = ioio_.openDigitalOutput(IOIO.LED_PIN);
+				Log.d("service", "setup");
+				led_ = ioio_.openDigitalOutput(0, true);
 
-				echoPin_1 = ioio_.openPulseInput(new DigitalInput.Spec(9), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-				triggerPin_1 = ioio_.openDigitalOutput(10);				
+				echoPin_1 = ioio_.openPulseInput(new DigitalInput.Spec(13), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+				triggerPin_1 = ioio_.openDigitalOutput(14);				
 				
-				if(isPermToGetDistance1And2)
-				{					
-					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(12), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-					triggerPin_2 = ioio_.openDigitalOutput(13);
-					
-					
-					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(15), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-					triggerPin_3 = ioio_.openDigitalOutput(16);
-				}								
+//				if(isPermToGetDistance1And2)
+//				{					
+//					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(12), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+//					triggerPin_2 = ioio_.openDigitalOutput(13);
+//					
+//					
+//					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(38), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+//					triggerPin_3 = ioio_.openDigitalOutput(39);
+//				}								
 			}
 
 			@Override
 			public void loop() throws ConnectionLostException, InterruptedException
 			{
-				led_.write(true);
+				//led_.write(true);
 				distances();
 			}
 
@@ -112,30 +114,32 @@ public class ARDroneIOIOService extends IOIOService
 				echoSecondsSensorFront = (int) (echoPin_1.getDuration() * 1000 * 1000);
 				echoDistanceCmSensorFront = echoSecondsSensorFront / 58;
 				sensorDistanceFront = echoDistanceCmSensorFront;
-//				Log.d("IOIOSensor", "Odleglosc sensor1:" + echoDistanceCmSensor1);
+				//Log.d("IOIOSensor", "Odleglosc sensor1:" + sensorDistanceFront);
 				
-				if(isPermToGetDistance1And2)
-				{
-					triggerPin_2.write(false);
-					Thread.sleep(5);
-					triggerPin_2.write(true);
-					Thread.sleep(1);
-					triggerPin_2.write(false);
-
-					echoSecondsSensorRight = (int) (echoPin_2.getDuration() * 1000 * 1000);
-					echoDistanceCmSensorRight = echoSecondsSensorRight / 58;
-					sensorDistanceRight = echoDistanceCmSensorRight;
-					
-					triggerPin_3.write(false);
-					Thread.sleep(5);
-					triggerPin_3.write(true);
-					Thread.sleep(1);
-					triggerPin_3.write(false);
-
-					echoSecondsSensorLeft = (int) (echoPin_3.getDuration() * 1000 * 1000);
-					echoDistanceCmSensorLeft = echoSecondsSensorLeft / 58;
-					sensorDistanceLeft = echoDistanceCmSensorLeft;
-				}
+//				if(isPermToGetDistance1And2)
+//				{
+//					triggerPin_2.write(false);
+//					Thread.sleep(5);
+//					triggerPin_2.write(true);
+//					Thread.sleep(1);
+//					triggerPin_2.write(false);
+//
+//					echoSecondsSensorRight = (int) (echoPin_2.getDuration() * 1000 * 1000);
+//					echoDistanceCmSensorRight = echoSecondsSensorRight / 58;
+//					sensorDistanceRight = echoDistanceCmSensorRight;
+//					//Log.d("IOIOSensor", "Odleglosc sensorRight:" + sensorDistanceRight);
+//					
+//					triggerPin_3.write(false);
+//					Thread.sleep(5);
+//					triggerPin_3.write(true);
+//					Thread.sleep(1);
+//					triggerPin_3.write(false);
+//
+//					echoSecondsSensorLeft = (int) (echoPin_3.getDuration() * 1000 * 1000);
+//					echoDistanceCmSensorLeft = echoSecondsSensorLeft / 58;
+//					sensorDistanceLeft = echoDistanceCmSensorLeft;
+//					//Log.d("IOIOSensor", "Odleglosc sensorLeft:" + sensorDistanceLeft);
+//				}
 
 				Thread.sleep(20);
 			}

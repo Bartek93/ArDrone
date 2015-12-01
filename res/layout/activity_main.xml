@@ -125,11 +125,57 @@
         android:text="Stop"
         android:id="@+id/stopBtn" android:layout_above="@+id/autonomyBtn"
         android:layout_alignStart="@+id/autonomyBtn" android:layout_alignEnd="@+id/autonomyBtn"/>
+
     <TextView
+        android:id="@+id/accTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/textViewSensor1" android:layout_alignBottom="@+id/stopBtn"
-        android:layout_alignParentEnd="true"/>
+        android:layout_above="@+id/leftBtn"
+        android:layout_toEndOf="@+id/connectBtn"
+        android:layout_toLeftOf="@+id/upBtn"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" 
+        />
+
+    <CheckBox
+        android:id="@+id/accBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/upBtn"
+        android:layout_alignBottom="@+id/upBtn"
+        android:layout_toLeftOf="@+id/rightBtn"
+        android:text="Acc" 
+        android:visibility="invisible"></CheckBox>"
+
+    <TextView
+        android:id="@+id/txtVFrontSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txtVRightSensor"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/rotateRightBtn"
+        android:text="Front:"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/txtVLeftSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/landingBtn"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:text="Left: "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/txtVRightSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/stopBtn"
+        android:layout_alignBottom="@+id/stopBtn"
+        android:layout_alignParentEnd="true"
+        android:layout_alignRight="@+id/stopBtn"
+        android:text="Right: "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </RelativeLayout>

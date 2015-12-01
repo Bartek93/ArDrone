@@ -23,8 +23,11 @@ import android.renderscript.Sampler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import ioioservice.ARDroneIOIOService;
 
 public class MainActivity extends Activity implements LocationListener, SensorEventListener
@@ -46,7 +49,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private Button autonomyBtn;
 	private Button stopBtn;
 
-	public TextView textViewSensor1;
+	private CheckBox accBox;
+	private ToggleButton tg;
+
+	private TextView accTxt;
+	private TextView txtVFrontSensor;
+	private TextView txtVRightSensor;
+	private TextView txtVLeftSensor;
 
 	private static final int SAFE_DISTANCE = 50; // in cm
 
@@ -61,13 +70,20 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 	protected boolean mBound = false;
 	private boolean mStarted = false;
+	
+	private static final boolean PERM_TO_SEND_COMMAND = false;
+
 	private boolean permToAutonomy = true;
+
 	private boolean permToHover = true;
 	private boolean permToGoForward = true;
+	private boolean permToControllByAcc = false;
 
 	private int sensorDistanceFront;
 	private int sensorDistanceRight;
 	private int sensorDistanceLeft;
+
+	private float mAkcel[];
 
 	private enum State
 	{
@@ -116,9 +132,17 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		autonomyBtn = (Button) findViewById(R.id.autonomyBtn);
 		stopBtn = (Button) findViewById(R.id.stopBtn);
 
-		textViewSensor1 = (TextView) findViewById(R.id.textViewSensor1);
+		accBox = (CheckBox) findViewById(R.id.accBox);
 
-		init();
+		txtVFrontSensor = (TextView) findViewById(R.id.txtVFrontSensor);
+		txtVRightSensor = (TextView) findViewById(R.id.txtVRightSensor);
+		txtVLeftSensor = (TextView) findViewById(R.id.txtVLeftSensor);
+
+		accTxt = (TextView) findViewById(R.id.accTxt);
+
+		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+		initListener();
 	}
 
 	private ServiceConnection mConnection = new ServiceConnection()
@@ -134,11 +158,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 			sensorDistanceFront = mService.getSensorDistanceFront();
 
-			if (mService.isPermToGetDistance1And2())
-			{
-				sensorDistanceRight = mService.getSensorDistanceRight();
-				sensorDistanceLeft = mService.getSensorDistanceLeft();
-			}
+//			if (mService.isPermToGetDistance1And2())
+//			{
+//				sensorDistanceRight = mService.getSensorDistanceRight();
+//				sensorDistanceLeft = mService.getSensorDistanceLeft();
+//			}
 		}
 
 		@Override
@@ -148,7 +172,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		}
 	};
 
-	private void init()
+	private void initListener()
 	{
 		connectBtn.setOnClickListener(mClickListener);
 		disconnectBtn.setOnClickListener(mClickListener);
@@ -166,6 +190,29 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		rotateRightBtn.setOnClickListener(mClickListener);
 		autonomyBtn.setOnClickListener(mClickListener);
 		stopBtn.setOnClickListener(mClickListener);
+
+		accBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+		{
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+			{
+				if (isChecked)
+				{
+					Log.i("onCheckedChanged", "checked !!!");
+					state = State.Hover;
+					//drone.hovering();
+					permToControllByAcc = true;
+				}
+				else
+				{
+					Log.i("onCheckedChanged", "UNchecked !!!");
+					permToControllByAcc = false;
+					Log.i("onCheckedChanged", "hover !!!");
+					// drone.hovering();
+				}
+			}
+		});
 	}
 
 	public OnClickListener mClickListener = new OnClickListener()
@@ -289,27 +336,34 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 							{
 
 								sensorDistanceFront = mService.getSensorDistanceFront();
+								Log.d("sensorDistanceFront=", " " + sensorDistanceFront);
 
-								if (mService.isPermToGetDistance1And2())
+								// if (mService.isPermToGetDistance1And2())
+								// {
+								// sensorDistanceRight =
+								// mService.getSensorDistanceRight();
+								// sensorDistanceLeft =
+								// mService.getSensorDistanceLeft();
+								// }
+
+								if (permToAutonomy)
 								{
+									// w³¹czyæ jedn¹ autonomie! albo autonomy()
+									// albo holdSafePositionAutonomy();
+
+									// autonomy();
+
+									// if (mService.isPermToGetDistance1And2())
+									// {
+									// // Log.i("isPermToGetDistance1And2",
+									// // "wszedlem !!!");
+									// holdSafePositionAutonomy();
+									// }
+
 									sensorDistanceRight = mService.getSensorDistanceRight();
 									sensorDistanceLeft = mService.getSensorDistanceLeft();
-								}
 
-								// Log.d("MainActivity", "Odleglosc sensor1:" +
-								// distance1);
-
-								if (isPermToAutonomy())
-								{
-									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
-									
-									autonomy();
-									
-									if(mService.isPermToGetDistance1And2())
-									{
-										holdSafePositionAutonomy();
-									}
-									
+									holdSafePositionAutonomy();
 									updateViews();
 								}
 							}
@@ -375,8 +429,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private void holdSafePositionAutonomy()
 	{
 		holdSafeFrontPosition();
-		holdSafeRightPosition();
-		holdSafeLeftPosition();
+
+		//holdSafeRightPosition();
+		//holdSafeLeftPosition();
 
 		checkIfIsSafe();
 	}
@@ -388,7 +443,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			if (state != State.Backward)
 			{
 				Log.d("MainActivity", "Autonomy goBackward");
-				drone.goBackward();
+				//drone.goBackward();
 				state = State.Backward;
 			}
 		}
@@ -401,7 +456,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			if (state != State.Left)
 			{
 				Log.d("MainActivity", "Autonomy goLeft");
-				drone.goLeft();
+				//drone.goLeft();
 				state = State.Left;
 			}
 		}
@@ -414,19 +469,20 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			if (state != State.Right)
 			{
 				Log.d("MainActivity", "Autonomy goRight");
-				drone.goRight();
+				///drone.goRight();
 				state = State.Right;
 			}
 		}
 	}
-	
+
 	private void checkIfIsSafe()
 	{
 		if (state == State.Backward)
 		{
 			if (sensorDistanceFront > SAFE_DISTANCE)
 			{
-				drone.hovering();
+				Log.d("MainActivity", "Autonomy Hover");
+				//drone.hovering();
 				state = State.Hover;
 			}
 		}
@@ -434,15 +490,17 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		{
 			if (sensorDistanceRight > SAFE_DISTANCE)
 			{
-				drone.hovering();
+				Log.d("MainActivity", "Autonomy Hover");
+				//drone.hovering();
 				state = State.Hover;
 			}
 		}
 		else if (state == State.Right)
 		{
+			Log.d("MainActivity", "Autonomy Hover");
 			if (sensorDistanceLeft > SAFE_DISTANCE)
 			{
-				drone.hovering();
+				//drone.hovering();
 				state = State.Hover;
 			}
 		}
@@ -452,6 +510,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	protected void onResume()
 	{
 		super.onResume();
+		//mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 		// startSensors();
 	}
 
@@ -459,6 +518,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	protected void onPause()
 	{
 		stopSensors();
+		//drone.landing();
 		super.onPause();
 	}
 
@@ -490,36 +550,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		}
 	}
 
-	public void startSensors()
-	{
-		if (mLocationManager == null)
-		{
-			mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-			if (mLocationManager != null)
-			{
-				mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-						1000 /* minTime ms */, 1 /* minDistance in meters */, this);
-			}
-		}
-
-		if (mSensorManager == null)
-		{
-			mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-			if (mSensorManager != null)
-			{
-				mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_NORMAL);
-
-			}
-		}
-
-	}
-
 	public void onLocationChanged(Location location)
 	{
 		// TODO Auto-generated method stub
 		mCurrentLocation = location;
 
-		Log.d("Drone", "Height=" + mCurrentLocation.getAltitude());
+		// Log.d("Drone", "Height=" + mCurrentLocation.getAltitude());
 	}
 
 	public void onProviderDisabled(String provider)
@@ -536,7 +572,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 	public void onStatusChanged(String provider, int status, Bundle extras)
 	{
-		// TODO Auto-generated method stub
 
 	}
 
@@ -549,6 +584,79 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	public void onSensorChanged(SensorEvent event)
 	{
 		mOrientation = event.values[0];
+
+		switch (event.sensor.getType())
+		{
+			case Sensor.TYPE_ACCELEROMETER:
+			{
+				mAkcel = event.values.clone();
+				break;
+			}
+		}
+
+		if (mAkcel != null)
+		{
+			accTxt.setText("Akcelerometru: " + "\nx: " + mAkcel[0] + "\ny: " + mAkcel[1] + "\nz: " + mAkcel[2]);
+		}
+
+		controlByAccelerometer();
+	}
+
+	private void controlByAccelerometer()
+	{
+		if (permToControllByAcc)
+		{
+			if (state != State.Forward)
+			{
+				if (mAkcel[0] < -3)
+				{
+					Log.i("onCheckedChanged", "forward !!!");
+					state = State.Forward;
+					//drone.goForward();
+				}
+			}
+
+			if (state != State.Backward)
+			{
+				if (mAkcel[0] > 3)
+				{
+					Log.i("onCheckedChanged", "backward !!!");
+					state = State.Backward;
+					//drone.goBackward();
+				}
+			}
+
+			if (state != State.Left)
+			{
+				if (mAkcel[1] < -3)
+				{
+					Log.i("onCheckedChanged", "left !!!");
+					state = State.Left;
+					//drone.goLeft();
+				}
+			}
+
+			if (state != State.Right)
+			{
+				if (mAkcel[1] > 3)
+				{
+					Log.i("onCheckedChanged", "right !!!");
+					state = State.Right;
+					//drone.goRight();
+				}
+			}
+
+			if (state != State.Hover)
+			{
+				if (mAkcel[0] < 3 && mAkcel[0] > -3 && mAkcel[1] < 3 && mAkcel[1] > -3)
+				{
+					Log.i("onCheckedChanged", "hover !!!");
+					state = State.Hover;
+					drone.hovering();
+				}
+			}
+
+		}
 	}
 
 	public boolean isPermToAutonomy()
@@ -574,11 +682,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		});
 	}
 
-	private void showVersions2(String title)
-	{
-		toast(String.format("%s\n", title));
-	}
-
 	private void updateViews()
 	{
 		runOnUiThread(new Runnable()
@@ -586,9 +689,44 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			@Override
 			public void run()
 			{
-				textViewSensor1.setText(String.valueOf(sensorDistanceFront));
+				txtVFrontSensor.setText("Front: " + String.valueOf(sensorDistanceFront));
+
+				//txtVRightSensor.setText("Right: " + String.valueOf(sensorDistanceRight));
+				//txtVLeftSensor.setText("Left: " + String.valueOf(sensorDistanceLeft));
+
 			}
 		});
 	}
+
+	// public void startSensors()
+	// {
+	// if (mLocationManager == null)
+	// {
+	// mLocationManager = (LocationManager)
+	// getSystemService(Context.LOCATION_SERVICE);
+	// if (mLocationManager != null)
+	// {
+	// mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+	// 1000 /* minTime ms */, 1 /* minDistance in meters */, this);
+	// }
+	// }
+	//
+	// if (mSensorManager == null)
+	// {
+	// mSensorManager = (SensorManager)
+	// getSystemService(Context.SENSOR_SERVICE);
+	// if (mSensorManager != null)
+	// {
+	// mSensorManager.registerListener(this,
+	// mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+	// SensorManager.SENSOR_DELAY_NORMAL);
+	// }
+	// }
+	// }
+
+	// private void showVersions2(String title)
+	// {
+	// toast(String.format("%s\n", title));
+	// }
 
 }

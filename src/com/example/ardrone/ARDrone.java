@@ -160,7 +160,7 @@ public class ARDrone
 
 		// ----------------------------------------------------------------------//
 		// ----------------------------------------------------------------------//
-		Log.i("ARDrone", "Speed:" + speed);
+		//Log.i("ARDrone", "Speed:" + speed);
 		// ----------------------------------------------------------------------//
 		// ----------------------------------------------------------------------//
 
@@ -241,7 +241,7 @@ public class ARDrone
 	{
 		int tmp = 0, n = 0;
 
-		Log.i("ARDrone", "get_int(): data = " + byte2hex(data, offset, 4));
+		//Log.i("ARDrone", "get_int(): data = " + byte2hex(data, offset, 4));
 		// System.out.println("get_int(): data = " + byte2hex(data, offset, 4));
 		for (int i = 3; i >= 0; i--)
 		{
@@ -261,7 +261,7 @@ public class ARDrone
 	public void send_pcmd(int enable, float pitch, float roll, float gaz, float yaw) throws Exception
 	{
 
-		Log.i("ARDrone", "speed: " + speed);
+		//Log.i("ARDrone", "speed: " + speed);
 		// System.out.println("Speed: " + speed);
 		send_at_cmd("AT*PCMD=" + get_seq() + "," + enable + "," + intOfFloat(pitch) + "," + intOfFloat(roll) + "," + intOfFloat(gaz) + ","
 				+ intOfFloat(yaw));
@@ -276,7 +276,7 @@ public class ARDrone
 	 */
 	public synchronized void send_at_cmd(String at_cmd) throws Exception
 	{
-		Log.i("ARDrone", "send_at_cmd:" + at_cmd);
+		//Log.i("ARDrone", "send_at_cmd:" + at_cmd);
 		// System.out.println("AT command: " + at_cmd);
 		at_cmd_last = at_cmd;
 		byte[] buf_snd = (at_cmd + "\r").getBytes();
@@ -317,7 +317,7 @@ public class ARDrone
 		{
 			// ----------------------------------------------------------------------//
 			// ----------------------------------------------------------------------//
-			Log.i("NavData", "Wejœcie w kontruktor");
+			//Log.i("NavData", "Wejœcie w kontruktor");
 			// ----------------------------------------------------------------------//
 			// ----------------------------------------------------------------------//
 			this.ardrone = ardrone;
@@ -337,7 +337,7 @@ public class ARDrone
 				{ 0x01, 0x00, 0x00, 0x00 };
 				DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.NAVDATA_PORT);
 				socket_nav.send(packet_snd);
-				Log.i("NavData", "Wys³ano trigger do portu UDP= " + ARDrone.NAVDATA_PORT);
+				//Log.i("NavData", "Wys³ano trigger do portu UDP= " + ARDrone.NAVDATA_PORT);
 				// System.out.println("Sent trigger flag to UDP port " +
 				// ARDrone.NAVDATA_PORT);
 
@@ -359,10 +359,10 @@ public class ARDrone
 						{
 							cnt = 0;
 
-							Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
+							//Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
 
-							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ="
-									+ ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+							//Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ="
+							//		+ ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
 
 							// System.out.println("NavData Received: " +
 							// packet_rcv.getLength() + " bytes");
