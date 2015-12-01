@@ -178,4 +178,14 @@
         android:text="Right: "
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+    <Button
+        android:id="@+id/simpleAutBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/accBox"
+        android:layout_alignBottom="@+id/accBox"
+        android:layout_toLeftOf="@+id/rightBtn"
+        android:text="SimpleAut" />
+
 </RelativeLayout>
