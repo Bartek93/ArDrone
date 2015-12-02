@@ -141,7 +141,7 @@ public class ARDroneIOIOService extends IOIOService
 					//Log.d("IOIOSensor", "Odleglosc sensorLeft:" + sensorDistanceLeft);
 				}
 
-				Thread.sleep(20);
+				Thread.sleep(200);
 			}
 		};
 	}

@@ -62,14 +62,16 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtVFrontSensor;
 	private TextView txtVRightSensor;
 	private TextView txtVLeftSensor;
+	private TextView txtAutonomyLog;
 
-	private static final int SAFE_DISTANCE = 50; // in cm
+	private static final int SAFE_DISTANCE = 80; // in cm
+	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 30; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
 	private static final String TAG = "MA"; // Main Activity
 	// wysy³anie polecen za pomoc¹ manulanego sterowania jest mo¿liwe, to blokuje tylko wysylanie polecen przy akcelerometrze i autonomi	
-	private static final boolean PERM_TO_SEND_COMMAND = false;	
+	private static final boolean PERM_TO_SEND_COMMAND = true;	
 	private static final boolean PERM_TO_GET_DISTANCE_L_AND_R = false; // prawego i lewego czujnika
 
 	private ARDroneAPI drone;
@@ -92,6 +94,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private int sensorDistanceRight;
 	private int sensorDistanceLeft;
 
+	private String autonomyLog = "";
+	
 	private float mAkcel[];
 	private enum State
 	{
@@ -182,6 +186,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		txtVFrontSensor = (TextView) findViewById(R.id.txtVFrontSensor);
 		txtVRightSensor = (TextView) findViewById(R.id.txtVRightSensor);
 		txtVLeftSensor = (TextView) findViewById(R.id.txtVLeftSensor);
+		txtAutonomyLog = (TextView) findViewById(R.id.txtAutonomyLog);
 		accTxt = (TextView) findViewById(R.id.accTxt);
 		simpleAutBtn = (Button) findViewById(R.id.simpleAutBtn);
 	}
@@ -414,11 +419,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					//drone = new ARDroneAPI();
 					Log.i(TAG, "simpleAutonomy(): connect !!!");
 					
-					while(true)
-					{
-						Log.i("aaa", "bbb");
-						Thread.sleep(1000);
-					}
+//					while(true)
+//					{
+//						Log.i("aaa", "bbb");
+//						Thread.sleep(1000);
+//					}
 				}
 				catch (Exception e)
 				{
@@ -459,6 +464,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	//===============================================================================================================================
 	
 	
+	
 	//===============================================================================================================================
 	// Niepe³na autonomia tzn trzeba najpierw po³¹czyæ siê, trymowaæ, wznieœæ i dopiero autonomia przy pomocy czujników
 	// Dzia³anie: 1 czujnik. Dron leci do przodu dopóki nie napotka przeszkody w odleglosci SAFE_DISTANCE, wtedy siê zatrzyma.
@@ -481,8 +487,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				if (state != State.Forward)
 				{
 					Log.d(TAG, "autonomy(): goForward");
-					// drone.goForward();
+					// drone.goForward();					
 					goForward();
+					autonomyLog = "goForward";
 					state = State.Forward;
 				}
 			}
@@ -496,12 +503,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 						Log.d(TAG, "autonomy(): hovering");
 						// drone.hovering();
 						hover();
+						autonomyLog = "hover";
 						state = State.Hover;
 					}
 				}
 			}
 
-			if (sensorDistanceFront < 20)
+			if (sensorDistanceFront < SAFE_DISTANCE_2)
 			{
 				if (state != State.Backward)
 				{
@@ -509,12 +517,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					permToHover = false;
 					// drone.goBackward();
 					goBackward();
+					autonomyLog = "goBackward";
 					state = State.Backward;
 				}
 			}
 		}
 	}
 	//===============================================================================================================================
+	
 	
 	
 	//===============================================================================================================================
@@ -615,8 +625,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			}
 		}
 	}
-
-
 
 	//===============================================================================================================================
 	
@@ -722,6 +730,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			public void run()
 			{
 				txtVFrontSensor.setText("Front: " + String.valueOf(sensorDistanceFront));
+				txtAutonomyLog.setText("Autonomy Log: " + autonomyLog);
 
 				if (PERM_TO_GET_DISTANCE_L_AND_R)
 				{
@@ -763,6 +772,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			else
 			{
 				Log.i(TAG, "drone=NULL, obiekt nie zosta³ stworzony");
+				autonomyLog = "obiekt drone=NULL";
 			}
 		}
 	}
@@ -817,6 +827,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			}
 		}
 	}
+	
 	private void land()
 	{
 		if(PERM_TO_SEND_COMMAND)

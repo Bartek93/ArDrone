@@ -188,4 +188,14 @@
         android:layout_toLeftOf="@+id/rightBtn"
         android:text="SimpleAut" />
 
+    <TextView
+        android:id="@+id/txtAutonomyLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/simpleAutBtn"
+        android:layout_alignTop="@+id/forwardBtn"
+        android:layout_toEndOf="@+id/connectBtn"
+        android:text="Autonomy Log:"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>
