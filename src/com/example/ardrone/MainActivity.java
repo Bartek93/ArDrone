@@ -2,6 +2,10 @@ package com.example.ardrone;
 
 import android.util.Log;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,6 +27,7 @@ import android.location.LocationManager;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.IBinder;
 import android.renderscript.Sampler;
 import android.view.View;
@@ -64,8 +69,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtVLeftSensor;
 	private TextView txtAutonomyLog;
 
-	private static final int SAFE_DISTANCE = 80; // in cm
-	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 30; // in cm
+	private static final int SAFE_DISTANCE = 100; // in cm
+	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 50; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
@@ -106,6 +111,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private final long startTime = 1000 * 5; // 5 sekund
 	private final long interval = 500 * 1;	// 0.5 sekundy
 	private MyCountDownTimer myCDTimer;
+	
+	private FileAccess fileAccess;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -394,7 +401,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				{
 					Log.i(TAG, "OnClickListener: simpleAutBtn !!!");
 
-					simpleAutonomy();
+					//simpleAutonomy();
+					
+					if(fileAccess == null)
+					{
+						createNewLogFile();
+					}
 					
 					break;
 				}
@@ -1032,8 +1044,27 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			{
 				e.printStackTrace();
 			}
-		}
-		
+		}		
 	}
+	
+    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", Locale.getDefault());
+    
+    private void createNewLogFile()
+    {
+        //File folder = new File(Environment.getExternalStorageDirectory() + "/ArDroneLogs");
+
+        String fileName = "/ArDroneLogs/ArDroneLogs_" + formatter.format(new Date()) + ".txt";
+        fileAccess = new FileAccess(fileName);
+        writeFirstLine();
+    }
+    
+    private void writeFirstLine()
+    {
+    	String linia = "Czesc, to moj trzeci zapis do pliku";
+    	fileAccess.append(linia);
+    	
+    	fileAccess.closeFile();
+    }
+    
 
 }

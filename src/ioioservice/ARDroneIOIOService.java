@@ -18,6 +18,8 @@ import ioio.lib.util.android.IOIOService;
 
 public class ARDroneIOIOService extends IOIOService
 {
+	private static final int SLEEP_TIME = 150;
+	
 	private final IBinder mBinder = new LocalBinder();
 	
 	private int sensorDistanceFront;
@@ -141,7 +143,7 @@ public class ARDroneIOIOService extends IOIOService
 					//Log.d("IOIOSensor", "Odleglosc sensorLeft:" + sensorDistanceLeft);
 				}
 
-				Thread.sleep(200);
+				Thread.sleep(SLEEP_TIME);
 			}
 		};
 	}
