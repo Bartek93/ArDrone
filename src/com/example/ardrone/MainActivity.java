@@ -113,6 +113,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private MyCountDownTimer myCDTimer;
 	
 	private FileAccess fileAccess;
+	
+	private MyThread myThread;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -353,6 +355,10 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				{
 					Log.i(TAG, "OnClickListener: autonomy !!!");
 					state = State.Default;
+					setPermToAutonomy(true);
+					
+//					myThread = new MyThread();
+//					myThread.start();
 
 					new Thread()
 					{
@@ -361,31 +367,26 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 						{
 							while (true)
 							{
-								sensorDistanceFront = mService.getSensorDistanceFront();
-								//Log.d("sensorDistanceFront=", " " + sensorDistanceFront);
-
-								if (PERM_TO_GET_DISTANCE_L_AND_R)
-								{
-									sensorDistanceRight = mService.getSensorDistanceRight();
-									sensorDistanceLeft = mService.getSensorDistanceLeft();
-								}
-
 								if (permToAutonomy)
 								{
+									sensorDistanceFront = mService.getSensorDistanceFront();
+									
 									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
 										
 									autonomy();
 
 									if (PERM_TO_GET_DISTANCE_L_AND_R)
 									{
+										sensorDistanceRight = mService.getSensorDistanceRight();
+										sensorDistanceLeft = mService.getSensorDistanceLeft();
 										//holdSafePositionAutonomy();		
 									}																
-								}
-								
+								}								
 								updateViews();
 							}
 						}
 					}.start();
+					
 					break;
 				}
 				case R.id.stopBtn:
@@ -393,7 +394,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					Log.i(TAG, "OnClickListener: stop !!!");
 					setPermToAutonomy(false);
 					//drone.hovering();
-					hover();
+					hover();					
 					state = State.Default;
 					break;
 				}
@@ -1061,6 +1062,49 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				e.printStackTrace();
 			}
 		}		
+	}
+	
+	public class MyThread extends Thread
+	{
+		@Override
+		public void run()
+		{
+				Log.i(TAG, "MyThread: run()");
+			
+//			try
+//			{
+//				while (!Thread.currentThread().isInterrupted())
+//				{
+//					// ...
+//				}
+//			}
+//			catch (InterruptedException consumed)
+//			{
+//				/* Allow thread to exit */
+//				consumed.printStackTrace();
+//			}
+			
+//			while (true)
+//			{
+//				if (permToAutonomy)
+//				{
+//					sensorDistanceFront = mService.getSensorDistanceFront();
+//					
+//					// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
+//						
+//					autonomy();
+//
+//					if (PERM_TO_GET_DISTANCE_L_AND_R)
+//					{
+//						sensorDistanceRight = mService.getSensorDistanceRight();
+//						sensorDistanceLeft = mService.getSensorDistanceLeft();
+//						//holdSafePositionAutonomy();		
+//					}																
+//				}								
+//				updateViews();
+//			}			
+		}
+
 	}
 	
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", Locale.getDefault());
