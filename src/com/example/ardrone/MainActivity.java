@@ -70,13 +70,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtAutonomyLog;
 
 	private static final int SAFE_DISTANCE = 100; // in cm
-	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 50; // in cm
+	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 70; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
 	private static final String TAG = "MA"; // Main Activity
 	// wysy³anie polecen za pomoc¹ manulanego sterowania jest mo¿liwe, to blokuje tylko wysylanie polecen przy akcelerometrze i autonomi	
-	private static final boolean PERM_TO_SEND_COMMAND = true;	
+	private static final boolean PERM_TO_SEND_COMMAND = false;	
 	private static final boolean PERM_TO_GET_DISTANCE_L_AND_R = false; // prawego i lewego czujnika
 
 	private ARDroneAPI drone;
@@ -487,6 +487,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		if(sensorDistanceFront == WRONG_RESULTS_1 || sensorDistanceFront > WRONG_RESULTS_2)
 		{
 			Log.i(TAG, "autonomy(): wrong results");
+			autonomyLog = "wrong results";
 			hover();
 			state = State.Hover;
 		}
@@ -498,11 +499,26 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 				if (state != State.Forward)
 				{
-					Log.d(TAG, "autonomy(): goForward");
-					// drone.goForward();					
-					goForward();
-					autonomyLog = "goForward";
-					state = State.Forward;
+					if(state == State.Backward)
+					{
+						Log.d(TAG, "autonomy(): hovering");
+						hover();
+						autonomyLog = "hover";
+						state = State.Hover;
+					}
+					else
+					{
+						Log.d(TAG, "autonomy(): goForward");	
+						goForward();
+						autonomyLog = "goForward";
+						state = State.Forward;
+					}
+					
+//					Log.d(TAG, "autonomy(): goForward");
+//					// drone.goForward();					
+//					goForward();
+//					autonomyLog = "goForward";
+//					state = State.Forward;
 				}
 			}
 

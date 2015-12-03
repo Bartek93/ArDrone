@@ -103,6 +103,7 @@ public class ARDrone
 	int seq_last = seq;
 	String at_cmd_last = "";
 	float speed = (float) 0.1;
+	//float speed = (float) 0.05;
 	boolean shift = false;
 	FloatBuffer fb;
 	IntBuffer ib;

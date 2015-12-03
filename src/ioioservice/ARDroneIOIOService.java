@@ -18,7 +18,7 @@ import ioio.lib.util.android.IOIOService;
 
 public class ARDroneIOIOService extends IOIOService
 {
-	private static final int SLEEP_TIME = 150;
+	private static final int SLEEP_TIME = 100;
 	
 	private final IBinder mBinder = new LocalBinder();
 	
@@ -89,12 +89,12 @@ public class ARDroneIOIOService extends IOIOService
 				
 				if(PERM_TO_GET_DISTANCE_L_AND_R)
 				{					
-					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(12), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-					triggerPin_2 = ioio_.openDigitalOutput(13);
+					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(6), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+					triggerPin_2 = ioio_.openDigitalOutput(7);
 					
 					
-					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(38), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-					triggerPin_3 = ioio_.openDigitalOutput(39);
+					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(12), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+					triggerPin_3 = ioio_.openDigitalOutput(11);
 				}								
 			}
 
