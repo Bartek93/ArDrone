@@ -191,4 +191,30 @@ public class ARDroneAPI
 			e.printStackTrace();
 		}
 	}
+	
+	public void magnetoRotateRight()
+	{
+		try
+		{
+			ardrone.send_pcmd_mag(1, 0, 0, 0, ardrone.getSpeed(), ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+		}
+		catch (Exception e)
+		{
+			Log.i("DroneAPI", "Exception magnetoRotate !!!");
+			e.printStackTrace();
+		}
+	}
+	
+	public void magnetoRotateLeft()
+	{
+		try
+		{
+			ardrone.send_pcmd_mag(1, 0, 0, 0, ardrone.getSpeed(), ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+		}
+		catch (Exception e)
+		{
+			Log.i("DroneAPI", "Exception magnetoRotate !!!");
+			e.printStackTrace();
+		}
+	}
 }

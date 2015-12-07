@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private static final String TAG = "MA"; // Main Activity
 	// wysy³anie polecen za pomoc¹ manulanego sterowania jest mo¿liwe, to blokuje tylko wysylanie polecen przy akcelerometrze i autonomi	
-	private static final boolean PERM_TO_SEND_COMMAND = false;	
+	private static final boolean PERM_TO_SEND_COMMAND = true;	
 	private static final boolean PERM_TO_GET_DISTANCE_L_AND_R = false; // prawego i lewego czujnika
 
 	private ARDroneAPI drone;
@@ -404,10 +404,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 					//simpleAutonomy();
 					
-					if(fileAccess == null)
-					{
-						createNewLogFile();
-					}
+//					if(fileAccess == null)
+//					{
+//						createNewLogFile();
+//					}
+					
+					drone.magnetoRotateRight();
 					
 					break;
 				}

@@ -91,6 +91,8 @@ public class ARDrone
 	static final int NAVDATA_PORT = 5554;
 	static final int VIDEO_PORT = 5555;
 	static final int AT_PORT = 5556;
+	
+	static final int CONTROL_PORT = 5559;
 
 	// NavData offset
 	static final int NAVDATA_STATE = 4;
@@ -108,6 +110,19 @@ public class ARDrone
 	FloatBuffer fb;
 	IntBuffer ib;
 	final static int INTERVAL = 100;
+	
+	float magneto_psi = (float) 0.1;
+	float magneto_psi_accuracy = (float) 0.5;
+	
+	public float getMagneto_psi()
+	{
+		return magneto_psi;
+	}
+
+	public float getMagneto_psi_accuracy()
+	{
+		return magneto_psi_accuracy;
+	}
 
 	public float getSpeed()
 	{
@@ -266,6 +281,12 @@ public class ARDrone
 		// System.out.println("Speed: " + speed);
 		send_at_cmd("AT*PCMD=" + get_seq() + "," + enable + "," + intOfFloat(pitch) + "," + intOfFloat(roll) + "," + intOfFloat(gaz) + ","
 				+ intOfFloat(yaw));
+	}
+	
+	public void send_pcmd_mag(int enable, float pitch, float roll, float gaz, float yaw, float magneto_psi, float magneto_psi_accuracy) throws Exception
+	{
+		send_at_cmd("AT*PCMD_MAG=" + get_seq() + "," + enable + "," + intOfFloat(pitch) + "," + intOfFloat(roll) + "," + intOfFloat(gaz) + ","
+				+ intOfFloat(yaw) + "," + intOfFloat(magneto_psi) + "," + intOfFloat(magneto_psi_accuracy));
 	}
 
 	/*
