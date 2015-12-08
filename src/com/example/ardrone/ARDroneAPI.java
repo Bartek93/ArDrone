@@ -4,6 +4,17 @@ import android.util.Log;
 
 public class ARDroneAPI
 {
+	private float magneto_psi = (float) 0.1;
+
+	public float getMagneto_psi()
+	{
+		return magneto_psi;
+	}
+
+	public void setMagneto_psi(float magneto_psi)
+	{
+		this.magneto_psi = magneto_psi;
+	}
 
 	private ARDrone ardrone;
 
@@ -196,7 +207,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd_mag(1, 0, 0, 0, ardrone.getSpeed(), ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+			ardrone.send_pcmd_mag(1, 0, 0, 0, (float) 0.1, ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
 		}
 		catch (Exception e)
 		{
@@ -209,7 +220,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd_mag(1, 0, 0, 0, ardrone.getSpeed(), ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+			ardrone.send_pcmd_mag(1, 0, 0, 0, -ardrone.getSpeed(), -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
 		}
 		catch (Exception e)
 		{

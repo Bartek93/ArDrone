@@ -70,7 +70,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtAutonomyLog;
 
 	private static final int SAFE_DISTANCE = 100; // in cm
-	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 70; // in cm
+	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 80; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
@@ -104,7 +104,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private float mAkcel[];
 	private enum State
 	{
-		Default, Hover, Forward, Backward, Right, Left
+		Default, Hover, Forward, Backward, Right, Left, Magneto_Rotate_Right
 	};
 	private State state = State.Default;
 	
@@ -396,6 +396,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					//drone.hovering();
 					hover();					
 					state = State.Default;
+					
+					//drone.magnetoRotateLeft();
+					
 					break;
 				}
 				case R.id.simpleAutBtn:
@@ -431,6 +434,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			{
 				try
 				{
+					
 					//drone = new ARDroneAPI();
 					Log.i(TAG, "simpleAutonomy(): connect !!!");
 					
@@ -522,6 +526,26 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //					goForward();
 //					autonomyLog = "goForward";
 //					state = State.Forward;
+				}
+			}
+			
+			if(state == State.Hover)
+			{
+				//Thread.sleep(2000);
+				drone.magnetoRotateRight();
+				state = State.Magneto_Rotate_Right;
+				drone.setMagneto_psi(drone.getMagneto_psi() + (float) 0.1);
+				
+				if(drone.getMagneto_psi() == (float) 1.0)
+				{
+					drone.setMagneto_psi(0);
+				}
+				
+				if (sensorDistanceFront < SAFE_DISTANCE)
+				{
+					hover();
+					autonomyLog = "hover";
+					state = State.Hover;
 				}
 			}
 

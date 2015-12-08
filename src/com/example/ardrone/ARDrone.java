@@ -98,14 +98,20 @@ public class ARDrone
 	static final int NAVDATA_STATE = 4;
 	static final int NAVDATA_BATTERY = 24;
 	static final int NAVDATA_ALTITUDE = 40;
+	
+	static final int COS1 = 26;
+	static final int COS2 = 27;
+	static final int COS3 = 28;
+	static final int COS4 = 29;
+	
 
 	InetAddress inet_addr;
 	DatagramSocket socket_at;
 	int seq = 1; // Send AT command with sequence number 1 will reset the counter
 	int seq_last = seq;
 	String at_cmd_last = "";
-	float speed = (float) 0.1;
-	//float speed = (float) 0.05;
+	//float speed = (float) 0.1;
+	float speed = (float) 0.05;
 	boolean shift = false;
 	FloatBuffer fb;
 	IntBuffer ib;
@@ -262,6 +268,7 @@ public class ARDrone
 		for (int i = 3; i >= 0; i--)
 		{
 			n <<= 8;
+			//Log.i("NavData", "data[offset + i]=" + data[offset + i] + "\n");
 			tmp = data[offset + i] & 0xFF;
 			n |= tmp;
 		}
@@ -383,8 +390,12 @@ public class ARDrone
 
 							//Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
 
-							//Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ="
-							//		+ ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ="
+									+ ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+							
+//							Log.i("NavData", "COS1=" + ARDrone.get_int(buf_rcv, COS1) + ", COS2="
+//									+ (float) ARDrone.get_int(buf_rcv, COS2) + ", COS3=" + (float) ARDrone.get_int(buf_rcv, COS3)
+//											+ ", COS4=" + (float) ARDrone.get_int(buf_rcv, COS4));
 
 							// System.out.println("NavData Received: " +
 							// packet_rcv.getLength() + " bytes");
@@ -406,6 +417,43 @@ public class ARDrone
 						ex1.printStackTrace();
 					}
 				}
+			}
+			catch (Exception ex2)
+			{
+				ex2.printStackTrace();
+			}
+		}
+	}
+	
+	class Control extends Thread
+	{
+		DatagramSocket socket_control;
+		InetAddress inet_addr;
+		ARDrone ardrone;
+		
+		public Control(ARDrone ardrone, InetAddress inet_addr) throws Exception
+		{
+			this.ardrone = ardrone;
+			this.inet_addr = inet_addr;
+
+			socket_control = new DatagramSocket(ARDrone.CONTROL_PORT);
+			socket_control.setSoTimeout(3000);
+		}
+		
+		public void run()
+		{
+			try
+			{
+				byte[] buf_snd = { 0x01, 0x00, 0x00, 0x00 };
+				DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.CONTROL_PORT);
+				socket_control.send(packet_snd);
+				
+				ardrone.send_at_cmd("AT*CTRL=" + ardrone.get_seq() + ",\"general:navdata_demo\",\"TRUE\"");
+
+				byte[] buf_rcv = new byte[10240];
+				DatagramPacket packet_rcv = new DatagramPacket(buf_rcv, buf_rcv.length);			
+
+				socket_control.receive(packet_rcv);
 			}
 			catch (Exception ex2)
 			{
