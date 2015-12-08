@@ -69,8 +69,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtVLeftSensor;
 	private TextView txtAutonomyLog;
 
-	private static final int SAFE_DISTANCE = 100; // in cm
-	private static final int SAFE_DISTANCE_2 = SAFE_DISTANCE - 80; // in cm
+	private static final int SAFE_DISTANCE = 80; // in cm
+	private static final int SAFE_DISTANCE_2 = 20; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
@@ -104,7 +104,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private float mAkcel[];
 	private enum State
 	{
-		Default, Hover, Forward, Backward, Right, Left, Magneto_Rotate_Right
+		Default, Hover, Forward, Backward, Right, Left, Magneto_Rotate_Right, Magneto_Rotate_Left
 	};
 	private State state = State.Default;
 	
@@ -485,18 +485,18 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	
 	//===============================================================================================================================
-	// Niepe³na autonomia tzn trzeba najpierw po³¹czyæ siê, trymowaæ, wznieœæ i dopiero autonomia przy pomocy czujników
-	// Dzia³anie: 1 czujnik. Dron leci do przodu dopóki nie napotka przeszkody w odleglosci SAFE_DISTANCE, wtedy siê zatrzyma.
-	// 			  Jeœli przeszkoda przybli¿y siê dron odsunie siê na odleg³oœæ SAFE_DISTANCE
+	// Niepe³na autonomia tzn trzeba najpierw po³¹czyæ siê, trymowaæ, wznieœæ i dopiero autonomia przy pomocy czujnika.
+	// Dzia³anie: 1 czujnik. Random Walk: Dron leci do przodu dopóki nie napotka przeszkody w odleglosci SAFE_DISTANCE, wtedy siê zatrzyma,
+	//			  po czym szuka miejsca w które mo¿e lecieæ (skrêcaj¹c w prawo).
+	// 			  Jeœli przeszkoda przybli¿y siê ponizej odleglosci SAFE_DISTANCE_2 dron odsunie siê na odleg³oœæ SAFE_DISTANCE
 
 	private void autonomy()
 	{
-		if(sensorDistanceFront == WRONG_RESULTS_1 || sensorDistanceFront > WRONG_RESULTS_2)
+		if (sensorDistanceFront == WRONG_RESULTS_1 || sensorDistanceFront > WRONG_RESULTS_2)
 		{
 			Log.i(TAG, "autonomy(): wrong results");
 			autonomyLog = "wrong results";
 			hover();
-			state = State.Hover;
 		}
 		else
 		{
@@ -506,60 +506,37 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 				if (state != State.Forward)
 				{
-					if(state == State.Backward)
+					if (state == State.Backward)
 					{
-						Log.d(TAG, "autonomy(): hovering");
 						hover();
-						autonomyLog = "hover";
-						state = State.Hover;
 					}
 					else
-					{
-						Log.d(TAG, "autonomy(): goForward");	
+					{						
 						goForward();
-						autonomyLog = "goForward";
-						state = State.Forward;
 					}
-					
-//					Log.d(TAG, "autonomy(): goForward");
-//					// drone.goForward();					
-//					goForward();
-//					autonomyLog = "goForward";
-//					state = State.Forward;
-				}
-			}
-			
-			if(state == State.Hover)
-			{
-				//Thread.sleep(2000);
-				drone.magnetoRotateRight();
-				state = State.Magneto_Rotate_Right;
-				drone.setMagneto_psi(drone.getMagneto_psi() + (float) 0.1);
-				
-				if(drone.getMagneto_psi() == (float) 1.0)
-				{
-					drone.setMagneto_psi(0);
-				}
-				
-				if (sensorDistanceFront < SAFE_DISTANCE)
-				{
-					hover();
-					autonomyLog = "hover";
-					state = State.Hover;
 				}
 			}
 
+			// Obrót w prawo, wy³¹czaj¹c tego if-a, dron bêdzie lata³ tylko do przodu i do ty³u
+			if (state == State.Hover)
+			{
+				// Thread.sleep(2000);
+				magnetoRotateRight();
+
+				if (sensorDistanceFront < SAFE_DISTANCE)
+				{
+					hover();
+				}
+			}
+
+			// musi byæ permToHover bo wtedy wchodzi³oby zarówno do SAFE_DISTANCE jak i SAFE_DISTANCE_2
 			if (permToHover)
 			{
 				if (sensorDistanceFront < SAFE_DISTANCE)
 				{
 					if (state != State.Hover)
-					{
-						Log.d(TAG, "autonomy(): hovering");
-						// drone.hovering();
+					{						
 						hover();
-						autonomyLog = "hover";
-						state = State.Hover;
 					}
 				}
 			}
@@ -567,13 +544,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			if (sensorDistanceFront < SAFE_DISTANCE_2)
 			{
 				if (state != State.Backward)
-				{
-					Log.d(TAG, "autonomy(): goBackward");
+				{					
 					permToHover = false;
-					// drone.goBackward();
 					goBackward();
-					autonomyLog = "goBackward";
-					state = State.Backward;
 				}
 			}
 		}
@@ -799,6 +772,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private void hover()
 	{
+		Log.d(TAG, "autonomy(): hover");
+		
+		autonomyLog = "hover";
+		state = State.Hover;
+		
 		if(PERM_TO_SEND_COMMAND)
 		{
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
@@ -816,6 +794,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private void goForward()
 	{
+		Log.d(TAG, "autonomy(): goForward");
+		
+		autonomyLog = "goForward";
+		state = State.Forward;
+		
 		if(PERM_TO_SEND_COMMAND)
 		{
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
@@ -834,6 +817,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private void goBackward()
 	{
+		Log.d(TAG, "autonomy(): goBackward");
+		
+		autonomyLog = "goBackward";
+		state = State.Backward;
+		
 		if(PERM_TO_SEND_COMMAND)
 		{
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
@@ -892,6 +880,56 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			{
 				drone.landing();
 				Log.i(TAG, "land()");
+			}
+			else
+			{
+				Log.i(TAG, "drone=NULL, obiekt nie zosta³ stworzony");
+			}
+		}
+	}
+	
+	private void magnetoRotateRight()
+	{
+		Log.d(TAG, "autonomy(): magnetoRotateRight");
+		
+		autonomyLog = "RotateRight";
+		state = State.Magneto_Rotate_Right;
+		
+		if(PERM_TO_SEND_COMMAND)
+		{
+			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
+			if(drone != null)
+			{
+				drone.magnetoRotateRight();
+				drone.setMagneto_psi(drone.getMagneto_psi() + (float) 0.1);
+				
+				if(drone.getMagneto_psi() == (float) 1.0)
+				{
+					drone.setMagneto_psi(0);
+				}
+				Log.i(TAG, "magnetoRotateRight()");
+			}
+			else
+			{
+				Log.i(TAG, "drone=NULL, obiekt nie zosta³ stworzony");
+			}
+		}
+	}
+	
+	private void magnetoRotateLeft()
+	{
+		Log.d(TAG, "autonomy(): magnetoRotateLeft");
+		
+		autonomyLog = "RotateLeft";
+		state = State.Magneto_Rotate_Left;
+		
+		if(PERM_TO_SEND_COMMAND)
+		{
+			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
+			if(drone != null)
+			{
+				drone.magnetoRotateLeft();;
+				Log.i(TAG, "magnetoRotateLeft()");
 			}
 			else
 			{

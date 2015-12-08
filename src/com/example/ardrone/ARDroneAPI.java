@@ -211,7 +211,7 @@ public class ARDroneAPI
 		}
 		catch (Exception e)
 		{
-			Log.i("DroneAPI", "Exception magnetoRotate !!!");
+			Log.i("DroneAPI", "Exception magnetoRotateRight !!!");
 			e.printStackTrace();
 		}
 	}
@@ -220,11 +220,11 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd_mag(1, 0, 0, 0, -ardrone.getSpeed(), -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+			ardrone.send_pcmd_mag(1, 0, 0, 0, (float) -0.1, -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
 		}
 		catch (Exception e)
 		{
-			Log.i("DroneAPI", "Exception magnetoRotate !!!");
+			Log.i("DroneAPI", "Exception magnetoRotateLeft !!!");
 			e.printStackTrace();
 		}
 	}
