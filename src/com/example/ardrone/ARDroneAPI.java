@@ -228,4 +228,17 @@ public class ARDroneAPI
 			e.printStackTrace();
 		}
 	}
+	
+	public void calibrateMagnetometer()
+	{
+		try
+		{
+			ardrone.send_calib_mag();
+		}
+		catch (Exception e)
+		{
+			Log.i("DroneAPI", "Exception calibrateMagnetometer !!!");
+			e.printStackTrace();
+		}
+	}
 }

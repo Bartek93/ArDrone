@@ -198,4 +198,14 @@
         android:text="Autonomy Log:"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
+    <Button
+        android:id="@+id/calibBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/takeOffBtn"
+        android:layout_alignBottom="@+id/takeOffBtn"
+        android:layout_toRightOf="@+id/takeOffBtn"
+        android:text="Calib" />
+
 </RelativeLayout>

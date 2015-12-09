@@ -295,6 +295,12 @@ public class ARDrone
 		send_at_cmd("AT*PCMD_MAG=" + get_seq() + "," + enable + "," + intOfFloat(pitch) + "," + intOfFloat(roll) + "," + intOfFloat(gaz) + ","
 				+ intOfFloat(yaw) + "," + intOfFloat(magneto_psi) + "," + intOfFloat(magneto_psi_accuracy));
 	}
+	
+	// 0 to id magnetometru
+	public void send_calib_mag() throws Exception
+	{
+		send_at_cmd("AT*CALIB=" + get_seq() + "," + 0);
+	}
 
 	/*
 	 * public void send_pcmd(int enable, float pitch, float roll, float gaz,
@@ -390,8 +396,7 @@ public class ARDrone
 
 							//Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
 
-							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ="
-									+ ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+							//Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ=" + ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
 							
 //							Log.i("NavData", "COS1=" + ARDrone.get_int(buf_rcv, COS1) + ", COS2="
 //									+ (float) ARDrone.get_int(buf_rcv, COS2) + ", COS3=" + (float) ARDrone.get_int(buf_rcv, COS3)

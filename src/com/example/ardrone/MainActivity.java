@@ -59,6 +59,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private Button autonomyBtn;
 	private Button stopBtn;
 	private Button simpleAutBtn;
+	private Button calibBtn;
 
 	private CheckBox accBox;
 	private ToggleButton tg;
@@ -69,7 +70,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtVLeftSensor;
 	private TextView txtAutonomyLog;
 
-	private static final int SAFE_DISTANCE = 80; // in cm
+	private static final int SAFE_DISTANCE = 64; // in cm
 	private static final int SAFE_DISTANCE_2 = 20; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
@@ -198,6 +199,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		txtAutonomyLog = (TextView) findViewById(R.id.txtAutonomyLog);
 		accTxt = (TextView) findViewById(R.id.accTxt);
 		simpleAutBtn = (Button) findViewById(R.id.simpleAutBtn);
+		calibBtn = (Button) findViewById(R.id.calibBtn);
 	}
 
 	private void initListener()
@@ -243,6 +245,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		});
 		
 		simpleAutBtn.setOnClickListener(mClickListener);
+		calibBtn.setOnClickListener(mClickListener);
 	}
 
 	public OnClickListener mClickListener = new OnClickListener()
@@ -373,7 +376,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 									
 									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
 										
-									autonomy();
+									//autonomy();
 
 									if (PERM_TO_GET_DISTANCE_L_AND_R)
 									{
@@ -412,8 +415,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //						createNewLogFile();
 //					}
 					
-					drone.magnetoRotateRight();
-					
+					//magnetoRotateLeft();			
+					break;
+				}
+				case R.id.calibBtn:
+				{
+					drone.calibrateMagnetometer();
 					break;
 				}
 
@@ -905,6 +912,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				
 				if(drone.getMagneto_psi() == (float) 1.0)
 				{
+					autonomyLog = "osiagnieto 1.0";
 					drone.setMagneto_psi(0);
 				}
 				Log.i(TAG, "magnetoRotateRight()");
