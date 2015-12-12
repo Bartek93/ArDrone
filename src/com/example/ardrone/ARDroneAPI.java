@@ -128,7 +128,8 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd(1, 0, 0, 0, -ardrone.getSpeed());
+			// ardrone.send_pcmd(1, 0, 0, 0, (float) -0.7);
+			ardrone.send_pcmd(1, 0, 0, 0, -1086324736);
 		}
 		catch (Exception e)
 		{
@@ -142,7 +143,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd(1, 0, 0, 0, ardrone.getSpeed());
+			ardrone.send_pcmd(1, 0, 0, 0, (float) 0.7);
 		}
 		catch (Exception e)
 		{
@@ -207,7 +208,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd_mag(1, 0, 0, 0, (float) 0.1, ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+			ardrone.send_pcmd_mag(1, 0, 0, 0, (float) 0.5, ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
 		}
 		catch (Exception e)
 		{
@@ -220,7 +221,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd_mag(1, 0, 0, 0, (float) -0.1, -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+			ardrone.send_pcmd_mag(1, 0, 0, 0, (float) -0.5, -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
 		}
 		catch (Exception e)
 		{

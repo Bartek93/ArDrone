@@ -415,7 +415,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //						createNewLogFile();
 //					}
 					
-					//magnetoRotateLeft();			
+					//magnetoRotateRight();
+					
+					magnetoRotateLeft();			
 					break;
 				}
 				case R.id.calibBtn:
@@ -679,7 +681,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 		if (mAkcel != null)
 		{
-			accTxt.setText("Akcelerometru: " + "\nx: " + mAkcel[0] + "\ny: " + mAkcel[1] + "\nz: " + mAkcel[2]);
+			accTxt.setText("Akcelerometr: " + "\nx: " + mAkcel[0] + "\ny: " + mAkcel[1] + "\nz: " + mAkcel[2]);
 		}
 
 		controlByAccelerometer();
