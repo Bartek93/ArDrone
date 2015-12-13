@@ -208,4 +208,33 @@
         android:layout_toRightOf="@+id/takeOffBtn"
         android:text="Calib" />
 
+    <Button
+        android:id="@+id/readBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/connectBtn"
+        android:layout_alignBottom="@+id/connectBtn"
+        android:layout_alignLeft="@+id/accTxt"
+        android:text="Read" 
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/magLeftBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/accTxt"
+        android:layout_toRightOf="@+id/leftBtn"
+        android:text="MagL" />
+
+    <Button
+        android:id="@+id/magRightBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/txtVFrontSensor"
+        android:layout_alignRight="@+id/simpleAutBtn"
+        android:text="MagR" />
+
 </RelativeLayout>

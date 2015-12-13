@@ -60,6 +60,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private Button stopBtn;
 	private Button simpleAutBtn;
 	private Button calibBtn;
+	private Button readBtn;
+	private Button magLeftBtn;
+	private Button magRightBtn;
 
 	private CheckBox accBox;
 	private ToggleButton tg;
@@ -200,6 +203,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		accTxt = (TextView) findViewById(R.id.accTxt);
 		simpleAutBtn = (Button) findViewById(R.id.simpleAutBtn);
 		calibBtn = (Button) findViewById(R.id.calibBtn);
+		readBtn = (Button) findViewById(R.id.readBtn);
+		magLeftBtn = (Button) findViewById(R.id.magLeftBtn);
+		magRightBtn = (Button) findViewById(R.id.magRightBtn);
 	}
 
 	private void initListener()
@@ -246,6 +252,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		
 		simpleAutBtn.setOnClickListener(mClickListener);
 		calibBtn.setOnClickListener(mClickListener);
+		readBtn.setOnClickListener(mClickListener);
+		magLeftBtn.setOnClickListener(mClickListener);
+		magRightBtn.setOnClickListener(mClickListener);
 	}
 
 	public OnClickListener mClickListener = new OnClickListener()
@@ -272,6 +281,19 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 								Log.i(TAG, "OnClickListener: Exception in Connect !!!");
 								e.printStackTrace();
 							}
+						}
+					}.start();
+					break;
+				}
+				case R.id.readBtn:
+				{
+					new Thread()
+					{
+						@Override
+						public void run()
+						{
+							Log.i(TAG, "OnClickListener: readBtn");
+
 						}
 					}.start();
 					break;
@@ -414,10 +436,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //					{
 //						createNewLogFile();
 //					}
-					
-					//magnetoRotateRight();
-					
-					magnetoRotateLeft();			
+					drone.magnetoSetNorth();
+							
 					break;
 				}
 				case R.id.calibBtn:
@@ -425,7 +445,16 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					drone.calibrateMagnetometer();
 					break;
 				}
-
+				case R.id.magLeftBtn:
+				{
+					magnetoRotateLeft();	
+					break;
+				}
+				case R.id.magRightBtn:
+				{
+					magnetoRotateRight();
+					break;
+				}
 			}
 		}
 	};

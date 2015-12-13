@@ -78,7 +78,9 @@ Digital keys 1~9: Change speed (rudder rate 5%~99%), 1 is min and 9 is max.
  */
 package com.example.ardrone;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
 import java.util.*;
 
@@ -104,14 +106,15 @@ public class ARDrone
 	static final int COS3 = 28;
 	static final int COS4 = 29;
 	
-
 	InetAddress inet_addr;
 	DatagramSocket socket_at;
 	int seq = 1; // Send AT command with sequence number 1 will reset the counter
 	int seq_last = seq;
 	String at_cmd_last = "";
 	//float speed = (float) 0.1;
-	float speed = (float) 0.05;
+	float speed = (float) 0.07;
+	float yawSpeed = (float) 0.7;
+
 	boolean shift = false;
 	FloatBuffer fb;
 	IntBuffer ib;
@@ -138,6 +141,11 @@ public class ARDrone
 	public void setSpeed(float s)
 	{
 		this.speed = s;
+	}
+	
+	public float getYawSpeed()
+	{
+		return yawSpeed;
 	}
 
 	public ARDrone(String ip) throws Exception
@@ -191,6 +199,11 @@ public class ARDrone
 
 		NavData nData = new NavData(this, inet_addr);
 		nData.start();
+		
+//		Control control = new Control(this, inet_addr);
+//		control.start();
+		
+		//readDroneConfiguration(this);
 
 		send_at_cmd("AT*PMODE=" + get_seq() + ",2");
 		Thread.sleep(INTERVAL);
@@ -430,43 +443,6 @@ public class ARDrone
 		}
 	}
 	
-	class Control extends Thread
-	{
-		DatagramSocket socket_control;
-		InetAddress inet_addr;
-		ARDrone ardrone;
-		
-		public Control(ARDrone ardrone, InetAddress inet_addr) throws Exception
-		{
-			this.ardrone = ardrone;
-			this.inet_addr = inet_addr;
-
-			socket_control = new DatagramSocket(ARDrone.CONTROL_PORT);
-			socket_control.setSoTimeout(3000);
-		}
-		
-		public void run()
-		{
-			try
-			{
-				byte[] buf_snd = { 0x01, 0x00, 0x00, 0x00 };
-				DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.CONTROL_PORT);
-				socket_control.send(packet_snd);
-				
-				ardrone.send_at_cmd("AT*CTRL=" + ardrone.get_seq() + ",\"general:navdata_demo\",\"TRUE\"");
-
-				byte[] buf_rcv = new byte[10240];
-				DatagramPacket packet_rcv = new DatagramPacket(buf_rcv, buf_rcv.length);			
-
-				socket_control.receive(packet_rcv);
-			}
-			catch (Exception ex2)
-			{
-				ex2.printStackTrace();
-			}
-		}
-	}
-
 	class Video extends Thread
 	{
 		DatagramSocket socket_video;
@@ -523,5 +499,140 @@ public class ARDrone
 				ex2.printStackTrace();
 			}
 		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	class Control extends Thread
+	{
+		DatagramSocket socket_control;
+		InetAddress inet_addr;
+		ARDrone ardrone;
+		
+		public Control(ARDrone ardrone, InetAddress inet_addr) throws Exception
+		{
+			this.ardrone = ardrone;
+			this.inet_addr = inet_addr;
+
+			socket_control = new DatagramSocket(ARDrone.CONTROL_PORT);
+			socket_control.setSoTimeout(3000);
+			Log.i("Control", "konstruktor");
+		}
+		
+		public void run()
+		{
+			try
+			{
+				Log.i("Control", "run poczatek");
+				byte[] buf_snd = { 0x01, 0x00, 0x00, 0x00 };
+				DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.CONTROL_PORT);
+				Log.i("Control", "run poczatek2");
+				
+				socket_control.send(packet_snd);
+				Log.i("Control", "run poczatek3");
+				
+				ardrone.send_at_cmd("AT*CTRL=" + ardrone.get_seq());
+
+				byte[] buf_rcv = new byte[10240];
+				DatagramPacket packet_rcv = new DatagramPacket(buf_rcv, buf_rcv.length);	
+				Log.i("Control", "run poczatek4");
+
+				socket_control.receive(packet_rcv);
+				
+				Log.i("Control", "run koniec");
+			}
+			catch (Exception ex2)
+			{
+				ex2.printStackTrace();
+			}
+		}
+	}
+	
+	public synchronized String readDroneConfiguration(ARDrone ardrone)
+	{
+
+		String ret = null;
+		synchronized (this)
+		{
+			Socket socket = null;
+			try
+			{
+				Log.i("Control", "run poczatek");
+				socket = new Socket(inet_addr.getHostAddress(), CONTROL_PORT);
+
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int readCount;
+				InputStream in = socket.getInputStream();
+				
+				Log.i("Control", "run poczatek 2");
+				try
+				{
+					ardrone.send_at_cmd("AT*CTRL=" + ardrone.get_seq() + 4 + ", " + 0);
+				}
+				catch (Exception e1)
+				{
+					Log.i("Control", "Exception");
+					e1.printStackTrace();
+				}
+				//cmd_queue.add(new ControlCommand(4, 0));
+				boolean continueReading = true;
+				Log.i("Control", "run poczatek 3");
+				while (continueReading && ((readCount = in.read(buffer)) > 0))
+				{
+					bos.write(buffer, 0, readCount);
+					try
+					{
+						Thread.sleep(100); // TODO: figure out something more
+											// complex. This code is required in
+											// order to give drone time to send
+											// content
+					}
+					catch (InterruptedException e)
+					{
+						Log.i("Control", "InterruptedException:");
+					}
+					continueReading = in.available() > 0;
+				}
+				bos.close();
+
+				ret = new String(bos.toByteArray(), "ASCII");
+				Log.i("Control", "ret="+ret);
+			}
+			catch (IOException ex)
+			{
+				Log.i("Control", "Error. Fialed to read drone configuration");
+			}
+			finally
+			{
+				try
+				{
+					socket.close();
+				}
+				catch (IOException e)
+				{
+					Log.i("Control", "IOException:");
+				}
+			}
+		}
+
+		Log.i("Control", "run poczatek 4");
+		return ret;
 	}
 }
