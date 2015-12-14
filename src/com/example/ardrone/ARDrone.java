@@ -121,8 +121,8 @@ public class ARDrone
 	int seq = 1; // Send AT command with sequence number 1 will reset the counter
 	int seq_last = seq;
 	String at_cmd_last = "";
-	//float speed = (float) 0.1;
-	float speed = (float) 0.07;
+	float speed = (float) 0.1;
+	//float speed = (float) 0.05;
 	float yawSpeed = (float) 0.7;
 
 	boolean shift = false;
@@ -500,14 +500,14 @@ public class ARDrone
 						{
 							cnt = 0;
 
-							int option_tag = byteArrayToShort(buf_rcv, 16);
-							
-							if (option_tag == NavDataTag.NAVDATA_VISION_DETECT_TAG.getValue())
-							{
-								List<VisionTag> vtags = parseVisionTags(buf_rcv, 20);
-								if (vtags != null)
-									setVisionTags(vtags);
-							}
+//							int option_tag = byteArrayToShort(buf_rcv, 16);
+//							
+//							if (option_tag == NavDataTag.NAVDATA_VISION_DETECT_TAG.getValue())
+//							{
+//								List<VisionTag> vtags = parseVisionTags(buf_rcv, 20);
+//								if (vtags != null)
+//									setVisionTags(vtags);
+//							}
 							
 							
 							//Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");

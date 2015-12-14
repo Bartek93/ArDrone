@@ -73,7 +73,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtVLeftSensor;
 	private TextView txtAutonomyLog;
 
-	private static final int SAFE_DISTANCE = 64; // in cm
+//	private static final int SAFE_DISTANCE = 64; // in cm
+	private static final int SAFE_DISTANCE = 50; // in cm
 	private static final int SAFE_DISTANCE_2 = 20; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
@@ -564,6 +565,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				if (sensorDistanceFront < SAFE_DISTANCE)
 				{
 					hover();
+//					try
+//					{
+//						Thread.sleep(1500);
+//					}
+//					catch (InterruptedException e)
+//					{
+//						e.printStackTrace();
+//					}
 				}
 			}
 
