@@ -398,7 +398,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 									
 									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
 										
-									//autonomy();
+									autonomy();
 
 									if (PERM_TO_GET_DISTANCE_L_AND_R)
 									{

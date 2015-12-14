@@ -97,14 +97,24 @@ public class ARDrone
 	static final int CONTROL_PORT = 5559;
 
 	// NavData offset
+	static final int NAVDATA_HEADER = 0;
 	static final int NAVDATA_STATE = 4;
+	static final int NAVDATA_SEQUENCE_NUMBER = 8;
+	static final int NAVDATA_VISION_TAG = 12;
 	static final int NAVDATA_BATTERY = 24;
-	static final int NAVDATA_ALTITUDE = 40;
+	static final int NAVDATA_PITCH = 28;
+	static final int NAVDATA_ROLL = 32;
+	static final int NAVDATA_YAW = 36;
+	static final int NAVDATA_ALTITUDE = 40; // wysokosc (pokazuje jak dron lata)
 	
-	static final int COS1 = 26;
-	static final int COS2 = 27;
-	static final int COS3 = 28;
-	static final int COS4 = 29;
+	static final int NAVDATA_VX = 44;// sprawdzic czy pokazuje jak dron lata
+	static final int NAVDATA_VY = 48;
+	static final int NAVDATA_VZ = 52;
+	
+	//
+	static final int NAVDATA_1_ID = 16;
+	static final int NAVDATA_1_SIZE = 18;
+	static final int NAVDATA_1_DATA = 20;
 	
 	InetAddress inet_addr;
 	DatagramSocket socket_at;
@@ -123,6 +133,29 @@ public class ARDrone
 	float magneto_psi = (float) 0.1;
 	float magneto_psi_accuracy = (float) 0.5;
 	
+	private float altitude;
+	private float yaw;
+	
+	public float getAltitude()
+	{
+		return altitude;
+	}
+
+	public void setAltitude(float altitude)
+	{
+		this.altitude = altitude;
+	}
+	
+	public float getYaw()
+	{
+		return yaw;
+	}
+
+	public void setYaw(float yaw)
+	{
+		this.yaw = yaw;
+	}
+
 	public float getMagneto_psi()
 	{
 		return magneto_psi;
@@ -271,6 +304,10 @@ public class ARDrone
 		}
 		return sb.toString();
 	}
+	
+	public static float byteArrayToFloat(byte[] b, int offset) {
+		return Float.intBitsToFloat(get_int(b, offset));
+	}
 
 	public static int get_int(byte[] data, int offset)
 	{
@@ -288,6 +325,21 @@ public class ARDrone
 
 		return n;
 	}
+	
+	// wziête z api
+	public static int byteArrayToInt(byte[] b, int offset) {
+		int value = 0;
+		for (int i = 3; i >= 0; i--) {
+			int shift = i * 8;
+			value += (b[i + offset] & 0x000000FF) << shift;
+		}
+		return value;
+	}
+	
+	//wziête z api
+	public static int byteArrayToShort(byte[] b, int offset) {
+		return ((b[offset + 1] & 0x000000FF) << 8) + (b[offset] & 0x000000FF);
+	}
 
 	public synchronized int get_seq()
 	{
@@ -296,9 +348,6 @@ public class ARDrone
 
 	public void send_pcmd(int enable, float pitch, float roll, float gaz, float yaw) throws Exception
 	{
-
-		//Log.i("ARDrone", "speed: " + speed);
-		// System.out.println("Speed: " + speed);
 		send_at_cmd("AT*PCMD=" + get_seq() + "," + enable + "," + intOfFloat(pitch) + "," + intOfFloat(roll) + "," + intOfFloat(gaz) + ","
 				+ intOfFloat(yaw));
 	}
@@ -325,7 +374,6 @@ public class ARDrone
 	public synchronized void send_at_cmd(String at_cmd) throws Exception
 	{
 		//Log.i("ARDrone", "send_at_cmd:" + at_cmd);
-		// System.out.println("AT command: " + at_cmd);
 		at_cmd_last = at_cmd;
 		byte[] buf_snd = (at_cmd + "\r").getBytes();
 		final DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.AT_PORT);
@@ -347,12 +395,64 @@ public class ARDrone
 		}.start();
 
 		/*
-		 * AR.Drone does not send back ack message (like "OK") byte[] buf_rcv =
-		 * new byte[64]; DatagramPacket packet_rcv = new DatagramPacket(buf_rcv,
-		 * buf_rcv.length); socket_at.receive(packet_rcv);
-		 * System.out.println(new
-		 * String(packet_rcv.getData(),0,packet_rcv.getLength()));
+		 * AR.Drone does not send back ack message (like "OK") 
+		 * byte[] buf_rcv = new byte[64]; DatagramPacket packet_rcv = new DatagramPacket(buf_rcv, buf_rcv.length); socket_at.receive(packet_rcv);
+		 * System.out.println(new String(packet_rcv.getData(),0,packet_rcv.getLength()));
 		 */
+	}
+	
+	// Vision tags data
+		protected List<VisionTag> vision_tags;
+		public List<VisionTag> getVisionTags() {
+			return vision_tags;
+		}
+
+		public void setVisionTags(List<VisionTag> vision_tags) {
+			this.vision_tags = vision_tags;
+		}
+	public static enum NavDataTag 
+	{
+		NAVDATA_DEMO_TAG(0), NAVDATA_TIME_TAG(1), NAVDATA_RAW_MEASURES_TAG(2), NAVDATA_PHYS_MEASURES_TAG(3), NAVDATA_GYROS_OFFSETS_TAG(4), NAVDATA_EULER_ANGLES_TAG(5), NAVDATA_REFERENCES_TAG(6), NAVDATA_TRIMS_TAG(7), NAVDATA_RC_REFERENCES_TAG(8), NAVDATA_PWM_TAG(9), NAVDATA_ALTITUDE_TAG(10), NAVDATA_VISION_RAW_TAG(11), NAVDATA_VISION_OF_TAG(12), NAVDATA_VISION_TAG(13), NAVDATA_VISION_PERF_TAG(14), NAVDATA_TRACKERS_SEND_TAG(15), NAVDATA_VISION_DETECT_TAG(16), NAVDATA_WATCHDOG_TAG(17), NAVDATA_ADC_DATA_FRAME_TAG(18), NAVDATA_VIDEO_STREAM_TAG(19), NAVDATA_CKS_TAG(0xFFFF);
+
+		private int value;
+
+		private NavDataTag(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+	}
+	
+	private static List<VisionTag> parseVisionTags(byte[] buf, int offset) throws NavDataFormatException
+	{
+		int nb_detected = byteArrayToInt(buf, offset);
+		offset += 4;
+
+		if (nb_detected != 0)
+			Log.v("NavData", "" + nb_detected + " vision tags detected");
+
+		if (nb_detected == 0)
+			return null;
+
+		assert (nb_detected > 0);
+		List<VisionTag> res = new ArrayList<VisionTag>(nb_detected);
+		for (int i = 0; i < nb_detected; i++)
+		{
+			int type = byteArrayToInt(buf, offset + 4 * i);
+			int xc = byteArrayToInt(buf, offset + 4 * i + 1 * nb_detected * 4);
+			int yc = byteArrayToInt(buf, offset + 4 * i + 2 * nb_detected * 4);
+			int width = byteArrayToInt(buf, offset + 4 * i + 3 * nb_detected * 4);
+			int height = byteArrayToInt(buf, offset + 4 * i + 4 * nb_detected * 4);
+			int dist = byteArrayToInt(buf, offset + 4 * i + 5 * nb_detected * 4);
+
+			VisionTag vt = new VisionTag(VisionTag.VisionTagType.fromInt(type), new Point(xc, yc), new Dimension(width, height), dist);
+			Log.v("NavData", "Vision#" + i + " " + vt.toString());
+			res.add(vt);
+		}
+
+		return res;
 	}
 
 	class NavData extends Thread
@@ -363,11 +463,6 @@ public class ARDrone
 
 		public NavData(ARDrone ardrone, InetAddress inet_addr) throws Exception
 		{
-			// ----------------------------------------------------------------------//
-			// ----------------------------------------------------------------------//
-			//Log.i("NavData", "Wejœcie w kontruktor");
-			// ----------------------------------------------------------------------//
-			// ----------------------------------------------------------------------//
 			this.ardrone = ardrone;
 			this.inet_addr = inet_addr;
 
@@ -381,13 +476,10 @@ public class ARDrone
 
 			try
 			{
-				byte[] buf_snd =
-				{ 0x01, 0x00, 0x00, 0x00 };
+				byte[] buf_snd = { 0x01, 0x00, 0x00, 0x00 };
 				DatagramPacket packet_snd = new DatagramPacket(buf_snd, buf_snd.length, inet_addr, ARDrone.NAVDATA_PORT);
 				socket_nav.send(packet_snd);
 				//Log.i("NavData", "Wys³ano trigger do portu UDP= " + ARDrone.NAVDATA_PORT);
-				// System.out.println("Sent trigger flag to UDP port " +
-				// ARDrone.NAVDATA_PORT);
 
 				ardrone.send_at_cmd("AT*CONFIG=" + ardrone.get_seq() + ",\"general:navdata_demo\",\"TRUE\"");
 
@@ -402,33 +494,44 @@ public class ARDrone
 
 						socket_nav.receive(packet_rcv);
 
+						// po cholere ten counter?
 						cnt++;
 						if (cnt >= 5)
 						{
 							cnt = 0;
 
+							int option_tag = byteArrayToShort(buf_rcv, 16);
+							
+							if (option_tag == NavDataTag.NAVDATA_VISION_DETECT_TAG.getValue())
+							{
+								List<VisionTag> vtags = parseVisionTags(buf_rcv, 20);
+								if (vtags != null)
+									setVisionTags(vtags);
+							}
+							
+							
 							//Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
 
-							//Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, Wysokoœæ=" + ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, "
+									+ "Wysokoœæ=" + ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
 							
-//							Log.i("NavData", "COS1=" + ARDrone.get_int(buf_rcv, COS1) + ", COS2="
-//									+ (float) ARDrone.get_int(buf_rcv, COS2) + ", COS3=" + (float) ARDrone.get_int(buf_rcv, COS3)
-//											+ ", COS4=" + (float) ARDrone.get_int(buf_rcv, COS4));
-
-							// System.out.println("NavData Received: " +
-							// packet_rcv.getLength() + " bytes");
-							// System.out.println(ARDrone.byte2hex(buf_rcv, 0,
-							// packet_rcv.getLength()));
-							// System.out.println("Battery: " +
-							// ARDrone.get_int(buf_rcv, ARDrone.NAVDATA_BATTERY)
-							// + "%, Altitude: " + ((float)
-							// ARDrone.get_int(buf_rcv,
-							// ARDrone.NAVDATA_ALTITUDE) / 1000) + "m");
+							setAltitude(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ALTITUDE)/1000);
+							
+							Log.i("NavData", "Pitch=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_PITCH)/1000 + 
+									", Roll=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ROLL)/1000 +
+									", Yaw=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
+							
+							setYaw(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
+							
+							Log.i("NavData", "VX=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VX) + 
+									", VY=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VY) +
+									", VZ=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VZ));
+							
 						}
 					}
 					catch (SocketTimeoutException ex3)
 					{
-						System.out.println("Video: socket_nav.receive(): Timeout");
+						System.out.println("NavData: socket_nav.receive(): Timeout");
 					}
 					catch (Exception ex1)
 					{
@@ -480,8 +583,7 @@ public class ARDrone
 
 						socket_video.receive(packet_rcv);
 						System.out.println("Video Received: " + packet_rcv.getLength() + " bytes");
-						// System.out.println(ARDrone.byte2hex(buf_rcv, 0,
-						// packet_rcv.getLength()));
+						// System.out.println(ARDrone.byte2hex(buf_rcv, 0, packet_rcv.getLength()));
 					}
 					catch (SocketTimeoutException ex3)
 					{
@@ -584,7 +686,7 @@ public class ARDrone
 				Log.i("Control", "run poczatek 2");
 				try
 				{
-					ardrone.send_at_cmd("AT*CTRL=" + ardrone.get_seq() + 4 + ", " + 0);
+					ardrone.send_at_cmd("AT*CTRL=" + ardrone.get_seq() + ", \"4\" ");
 				}
 				catch (Exception e1)
 				{
