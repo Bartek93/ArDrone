@@ -74,7 +74,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtAutonomyLog;
 
 //	private static final int SAFE_DISTANCE = 64; // in cm
-	private static final int SAFE_DISTANCE = 50; // in cm
+	private static final int SAFE_DISTANCE =64; // in cm
 	private static final int SAFE_DISTANCE_2 = 20; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
@@ -531,11 +531,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 	private void autonomy()
 	{
-		if (sensorDistanceFront == WRONG_RESULTS_1 || sensorDistanceFront > WRONG_RESULTS_2)
+		if (sensorDistanceFront == WRONG_RESULTS_1)
 		{
 			Log.i(TAG, "autonomy(): wrong results");
 			autonomyLog = "wrong results";
-			hover();
+			//hover();
 		}
 		else
 		{
@@ -558,16 +558,30 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 			// Obrót w prawo, wy³¹czaj¹c tego if-a, dron bêdzie lata³ tylko do przodu i do ty³u
 			if (state == State.Hover)
-			{
-				// Thread.sleep(2000);
+			{	
+//				TimerTask timerTask = new MyTimerTask();
+//				timerTask.run();
+//				timerTask.cancel();
+				
+				
+//				try
+//				{
+//					Thread.sleep(2000);
+//				}
+//				catch (InterruptedException e)
+//				{
+//					e.printStackTrace();
+//				}
+				
 				magnetoRotateRight();
 
 				if (sensorDistanceFront < SAFE_DISTANCE)
 				{
 					hover();
+					
 //					try
 //					{
-//						Thread.sleep(1500);
+//						Thread.sleep(2000);
 //					}
 //					catch (InterruptedException e)
 //					{
@@ -575,8 +589,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //					}
 				}
 			}
-
-			// musi byæ permToHover bo wtedy wchodzi³oby zarówno do SAFE_DISTANCE jak i SAFE_DISTANCE_2
+			
+			// musi byæ permToHover bo wtedy przy cofaniu pomiêdzy SAFE_DISTANCE a SAFE_DISTANCE_2 wchodzi³oby zarówno do SAFE_DISTANCE i zatrzyma³by siê jeszcze przed doleglosci¹ SAFE_DISTANCE 
 			if (permToHover)
 			{
 				if (sensorDistanceFront < SAFE_DISTANCE)
@@ -596,6 +610,60 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					goBackward();
 				}
 			}
+			
+//			if (state == State.Hover)
+//			{
+//							
+//				
+//				if(drone.getMagneto_psi() == (float) 1.0)
+//				{
+//					magnetoRotateLeft();
+//				}
+//				else
+//				{
+//					magnetoRotateRight();	
+//				}
+//
+//				if (sensorDistanceFront < SAFE_DISTANCE)
+//				{
+//					hover();
+//					try
+//					{
+//						Thread.sleep(1500);
+//					}
+//					catch (InterruptedException e)
+//					{
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+			
+//			if (state == State.Hover)
+//			{
+//				float oldYawAngle = drone.getArdrone().getYawAngle();
+//				
+//				RotateRight();
+//				
+//				float newYawAngle = drone.getArdrone().getYawAngle();
+//					
+//				
+//				if(newYawAngle > oldYawAngle + 25)
+//
+//				if (sensorDistanceFront < SAFE_DISTANCE)
+//				{
+//					hover();
+////					try
+////					{
+////						Thread.sleep(1500);
+////					}
+////					catch (InterruptedException e)
+////					{
+////						e.printStackTrace();
+////					}
+//				}
+//			}
+
+
 		}
 	}
 	//===============================================================================================================================
@@ -947,13 +1015,19 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
 			if(drone != null)
 			{
-				drone.magnetoRotateRight();
-				drone.setMagneto_psi(drone.getMagneto_psi() + (float) 0.1);
+//				if(drone.getMagneto_psi() == (float) 0)
+//				{
+//					drone.setMagneto_psi(drone.getMagneto_psi() + (float) 0.1);
+//					drone.magnetoRotateRight();					
+//				}
 				
-				if(drone.getMagneto_psi() == (float) 1.0)
+				drone.magnetoRotateRight();	
+				drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() + (float) 0.1);				
+				
+				if(drone.getArdrone().getMagneto_psi() == (float) 1.0)
 				{
 					autonomyLog = "osiagnieto 1.0";
-					drone.setMagneto_psi(0);
+					drone.getArdrone().setMagneto_psi(0);
 				}
 				Log.i(TAG, "magnetoRotateRight()");
 			}
@@ -976,8 +1050,33 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
 			if(drone != null)
 			{
-				drone.magnetoRotateLeft();;
+				drone.magnetoRotateLeft();
+				drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() - (float) 0.1);
+								
 				Log.i(TAG, "magnetoRotateLeft()");
+			}
+			else
+			{
+				Log.i(TAG, "drone=NULL, obiekt nie zosta³ stworzony");
+			}
+		}
+	}
+	
+	private void RotateRight()
+	{
+		Log.d(TAG, "autonomy(): RotateRight");
+		
+		autonomyLog = "RotateRight";
+		state = State.Magneto_Rotate_Right;
+		
+		if(PERM_TO_SEND_COMMAND)
+		{
+			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
+			if(drone != null)
+			{
+				drone.rotater();
+				
+				Log.i(TAG, "RotateRight()");
 			}
 			else
 			{
@@ -1132,30 +1231,44 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		@Override
 		public void run()
 		{
-			wait3Seconds();
-			
-			Log.i("MyTimerTask", "trim");	
-			wait3Seconds();
-			
-			Log.i("MyTimerTask", "takeoff");
-			wait3Seconds();
-			
-			Log.i("MyTimerTask", "flying");
-			wait8Seconds();
-			
-			Log.i("MyTimerTask", "land");
-			wait3Seconds();
-			
-			Log.i("MyTimerTask", "disconnect");
-			wait3Seconds();
+			wait2Seconds();
+			magnetoRotateRight();	
+			wait2Seconds();
+			hover();
+//			Log.i("MyTimerTask", "trim");	
+//			wait3Seconds();
+//			
+//			Log.i("MyTimerTask", "takeoff");
+//			wait3Seconds();
+//			
+//			Log.i("MyTimerTask", "flying");
+//			wait8Seconds();
+//			
+//			Log.i("MyTimerTask", "land");
+//			wait3Seconds();
+//			
+//			Log.i("MyTimerTask", "disconnect");
+//			wait3Seconds();
 			
 		}
 		
-		private void wait3Seconds()
+		private void wait1Second()
 		{
 			try
 			{
-				Thread.sleep(3000);
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		private void wait2Seconds()
+		{
+			try
+			{
+				Thread.sleep(2000);
 			}
 			catch (InterruptedException e)
 			{

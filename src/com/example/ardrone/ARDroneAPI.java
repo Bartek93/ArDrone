@@ -4,19 +4,12 @@ import android.util.Log;
 
 public class ARDroneAPI
 {
-	private float magneto_psi = (float) 0.1;
-
-	public float getMagneto_psi()
-	{
-		return magneto_psi;
-	}
-
-	public void setMagneto_psi(float magneto_psi)
-	{
-		this.magneto_psi = magneto_psi;
-	}
-
 	private ARDrone ardrone;
+
+	public ARDrone getArdrone()
+	{
+		return ardrone;
+	}
 
 	public static String DRONE_IP = "192.168.1.1";
 
@@ -88,7 +81,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_at_cmd("AT*FTRIM=" + ardrone.get_seq()); // flat trim
+			ardrone.send_at_cmd("AT*FTRIM=" + ardrone.get_seq());
 		}
 		catch (Exception e)
 		{
@@ -128,8 +121,8 @@ public class ARDroneAPI
 	{
 		try
 		{
-			// ardrone.send_pcmd(1, 0, 0, 0, -ardrone.getYawSpeed());
-			ardrone.send_pcmd(1, 0, 0, 0, -1086324736);
+			ardrone.send_pcmd(1, 0, 0, 0, -ardrone.getYawSpeed());
+			// ardrone.send_pcmd(1, 0, 0, 0, -1086324736);	// mo¿na wysy³aæ w postaci int32, -1086324736 oznacza, ¿e z prêdkoœci¹ 0.75 max predkosci
 		}
 		catch (Exception e)
 		{
@@ -169,7 +162,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd(1, 0, ardrone.getSpeed(), 0, 0);
+			ardrone.send_pcmd(1, 0, 0.05f, 0, 0);
 		}
 		catch (Exception e)
 		{

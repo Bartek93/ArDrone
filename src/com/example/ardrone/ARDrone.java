@@ -92,8 +92,7 @@ public class ARDrone
 {
 	static final int NAVDATA_PORT = 5554;
 	static final int VIDEO_PORT = 5555;
-	static final int AT_PORT = 5556;
-	
+	static final int AT_PORT = 5556;	
 	static final int CONTROL_PORT = 5559;
 
 	// NavData offset
@@ -105,82 +104,30 @@ public class ARDrone
 	static final int NAVDATA_PITCH = 28;
 	static final int NAVDATA_ROLL = 32;
 	static final int NAVDATA_YAW = 36;
-	static final int NAVDATA_ALTITUDE = 40; // wysokosc (pokazuje jak dron lata)
-	
-	static final int NAVDATA_VX = 44;// sprawdzic czy pokazuje jak dron lata
+	static final int NAVDATA_ALTITUDE = 40; // wysokosc (pokazuje jak dron lata)	
+	static final int NAVDATA_VX = 44;// pokazuje jak dron lata
 	static final int NAVDATA_VY = 48;
-	static final int NAVDATA_VZ = 52;
-	
-	//
-	static final int NAVDATA_1_ID = 16;
-	static final int NAVDATA_1_SIZE = 18;
-	static final int NAVDATA_1_DATA = 20;
+	static final int NAVDATA_VZ = 52;	
 	
 	InetAddress inet_addr;
 	DatagramSocket socket_at;
 	int seq = 1; // Send AT command with sequence number 1 will reset the counter
 	int seq_last = seq;
-	String at_cmd_last = "";
-	float speed = (float) 0.1;
-	//float speed = (float) 0.05;
-	float yawSpeed = (float) 0.7;
-
+	String at_cmd_last = "";	
 	boolean shift = false;
 	FloatBuffer fb;
 	IntBuffer ib;
 	final static int INTERVAL = 100;
 	
-	float magneto_psi = (float) 0.1;
-	float magneto_psi_accuracy = (float) 0.5;
-	
 	private float altitude;
-	private float yaw;
+	private float yawAngle;
 	
-	public float getAltitude()
-	{
-		return altitude;
-	}
-
-	public void setAltitude(float altitude)
-	{
-		this.altitude = altitude;
-	}
+	// Parametry do zmian
+	private float speed = (float) 0.08; // 0.05 to raczej minimum
+	private float yawSpeed = (float) 0.2;	// 0.2 to raczej minimum
+	private float magneto_psi = (float) 0.1;	// 0.1 to 18 stopni
+	private float magneto_psi_accuracy = (float) 0;
 	
-	public float getYaw()
-	{
-		return yaw;
-	}
-
-	public void setYaw(float yaw)
-	{
-		this.yaw = yaw;
-	}
-
-	public float getMagneto_psi()
-	{
-		return magneto_psi;
-	}
-
-	public float getMagneto_psi_accuracy()
-	{
-		return magneto_psi_accuracy;
-	}
-
-	public float getSpeed()
-	{
-		return speed;
-	}
-
-	public void setSpeed(float s)
-	{
-		this.speed = s;
-	}
-	
-	public float getYawSpeed()
-	{
-		return yawSpeed;
-	}
-
 	public ARDrone(String ip) throws Exception
 	{
 		// ----------------------------------------------------------------------//
@@ -512,20 +459,20 @@ public class ARDrone
 							
 							//Log.i("NavData", "Otrzymano pakiet o d³ugoœci = " + packet_rcv.getLength() + " bajtów");
 
-							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, "
-									+ "Wysokoœæ=" + ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
-							
-							setAltitude(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ALTITUDE)/1000);
-							
-							Log.i("NavData", "Pitch=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_PITCH)/1000 + 
-									", Roll=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ROLL)/1000 +
-									", Yaw=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
-							
-							setYaw(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
-							
-							Log.i("NavData", "VX=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VX) + 
-									", VY=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VY) +
-									", VZ=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VZ));
+//							Log.i("NavData", "Bateria=" + ARDrone.get_int(buf_rcv, NAVDATA_BATTERY) + "%, "
+//									+ "Wysokoœæ=" + ((float) ARDrone.get_int(buf_rcv, NAVDATA_ALTITUDE) / 1000) + "m");
+//							
+//							setAltitude(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ALTITUDE)/1000);
+//							
+//							Log.i("NavData", "Pitch=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_PITCH)/1000 + 
+//									", Roll=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ROLL)/1000 +
+//									", Yaw=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
+//							
+//							setYawAngle(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
+//							
+//							Log.i("NavData", "VX=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VX) + 
+//									", VY=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VY) +
+//									", VZ=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VZ));
 							
 						}
 					}
@@ -736,5 +683,55 @@ public class ARDrone
 
 		Log.i("Control", "run poczatek 4");
 		return ret;
+	}
+	
+	public float getAltitude()
+	{
+		return altitude;
+	}
+
+	public void setAltitude(float altitude)
+	{
+		this.altitude = altitude;
+	}
+	
+	public float getYawAngle()
+	{
+		return yawAngle;
+	}
+
+	public void setYawAngle(float yaw)
+	{
+		this.yawAngle = yaw;
+	}
+
+	public float getMagneto_psi()
+	{
+		return magneto_psi;
+	}
+	
+	public void setMagneto_psi(float magneto_psi)
+	{
+		this.magneto_psi = magneto_psi;
+	}
+
+	public float getMagneto_psi_accuracy()
+	{
+		return magneto_psi_accuracy;
+	}
+
+	public float getSpeed()
+	{
+		return speed;
+	}
+
+	public void setSpeed(float s)
+	{
+		this.speed = s;
+	}
+	
+	public float getYawSpeed()
+	{
+		return yawSpeed;
 	}
 }

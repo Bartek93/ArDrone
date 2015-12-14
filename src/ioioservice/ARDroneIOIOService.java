@@ -18,7 +18,7 @@ import ioio.lib.util.android.IOIOService;
 
 public class ARDroneIOIOService extends IOIOService
 {
-	private static final int SLEEP_TIME = 100;
+	private static final int SLEEP_TIME = 80;
 	
 	private final IBinder mBinder = new LocalBinder();
 	
