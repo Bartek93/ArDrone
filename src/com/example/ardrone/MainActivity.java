@@ -395,11 +395,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 							{
 								if (permToAutonomy)
 								{
-									sensorDistanceFront = mService.getSensorDistanceFront();
+									sensorDistanceFront = mService.getSensorDistanceFront();									
 									
-									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy();
-										
+									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy(); albo simpleAutonomy()										
 									autonomy();
+									
+									updateViews();
 
 									if (PERM_TO_GET_DISTANCE_L_AND_R)
 									{
@@ -408,7 +409,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 										//holdSafePositionAutonomy();		
 									}																
 								}								
-								updateViews();
+								
 							}
 						}
 					}.start();
@@ -545,14 +546,15 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 				if (state != State.Forward)
 				{
-					if (state == State.Backward)
-					{
-						hover();
-					}
-					else
-					{						
-						goForward();
-					}
+					goForward();
+//					if (state == State.Backward)
+//					{
+//						hover();
+//					}
+//					else
+//					{						
+//						goForward();
+//					}
 				}
 			}
 
@@ -564,30 +566,29 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //				timerTask.cancel();
 				
 				
-//				try
-//				{
-//					Thread.sleep(2000);
-//				}
-//				catch (InterruptedException e)
-//				{
-//					e.printStackTrace();
-//				}
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 				
 				magnetoRotateRight();
-
-				if (sensorDistanceFront < SAFE_DISTANCE)
+				
+				updateViews();
+				
+				try
 				{
-					hover();
-					
-//					try
-//					{
-//						Thread.sleep(2000);
-//					}
-//					catch (InterruptedException e)
-//					{
-//						e.printStackTrace();
-//					}
+					Thread.sleep(600);
 				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				
+				hover();	
 			}
 			
 			// musi byæ permToHover bo wtedy przy cofaniu pomiêdzy SAFE_DISTANCE a SAFE_DISTANCE_2 wchodzi³oby zarówno do SAFE_DISTANCE i zatrzyma³by siê jeszcze przed doleglosci¹ SAFE_DISTANCE 
@@ -772,6 +773,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	//===============================================================================================================================
 	
 
+	// Do akcelerometru
 	public void onSensorChanged(SensorEvent event)
 	{
 		mOrientation = event.values[0];
@@ -1022,13 +1024,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //				}
 				
 				drone.magnetoRotateRight();	
-				drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() + (float) 0.1);				
-				
-				if(drone.getArdrone().getMagneto_psi() == (float) 1.0)
-				{
-					autonomyLog = "osiagnieto 1.0";
-					drone.getArdrone().setMagneto_psi(0);
-				}
+//				drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() + (float) 0.1);			
+//				if(drone.getArdrone().getMagneto_psi() == (float) 1.0)
+//				{
+//					autonomyLog = "osiagnieto 1.0";
+//					drone.getArdrone().setMagneto_psi(0);
+//				}
 				Log.i(TAG, "magnetoRotateRight()");
 			}
 			else
@@ -1089,6 +1090,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	protected void onResume()
 	{
 		super.onResume();
+		// Do akcelerometru
 		//mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 		// startSensors();
 	}
@@ -1097,7 +1099,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	protected void onPause()
 	{
 		stopSensors();
-		//drone.landing();
 		land();
 		super.onPause();
 	}
