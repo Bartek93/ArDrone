@@ -123,7 +123,7 @@ public class ARDrone
 	private float yawAngle;
 	
 	// Parametry do zmian
-	private float speed = (float) 0.08; // 0.05 to raczej minimum
+	private float speed = (float) 0.07; // 0.05 to raczej minimum
 	private float yawSpeed = (float) 0.2;	// 0.2 to raczej minimum
 	private float magneto_psi = (float) 0.1;	// 0.1 to 18 stopni
 	private float magneto_psi_accuracy = (float) 0;
@@ -467,8 +467,10 @@ public class ARDrone
 //							Log.i("NavData", "Pitch=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_PITCH)/1000 + 
 //									", Roll=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_ROLL)/1000 +
 //									", Yaw=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
+							
+							Log.i("NavData", "Yaw=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
 //							
-//							setYawAngle(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
+							setYawAngle(ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_YAW)/1000);
 //							
 //							Log.i("NavData", "VX=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VX) + 
 //									", VY=" + ARDrone.byteArrayToFloat(buf_rcv, NAVDATA_VY) +

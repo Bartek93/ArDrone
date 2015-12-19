@@ -237,4 +237,35 @@
         android:layout_alignRight="@+id/simpleAutBtn"
         android:text="MagR" />
 
+    <TextView
+        android:id="@+id/txtNewAngle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ftrimBtn"
+        android:layout_alignLeft="@+id/ftrimBtn"
+        android:layout_toEndOf="@+id/connectBtn"
+        android:text="New angle: "
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/txtOldAngle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/txtVLeftSensor"
+        android:layout_alignBottom="@+id/txtVLeftSensor"
+        android:layout_alignLeft="@+id/magLeftBtn"
+        android:layout_toEndOf="@+id/connectBtn"
+        android:text="Old angle: "
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/txtYawAngle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/txtVFrontSensor"
+        android:layout_alignLeft="@+id/rotateLeftBtn"
+        android:layout_toEndOf="@+id/connectBtn"
+        android:text="Angle: "
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>

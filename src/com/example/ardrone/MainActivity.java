@@ -72,16 +72,19 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtVRightSensor;
 	private TextView txtVLeftSensor;
 	private TextView txtAutonomyLog;
+	private TextView txtYawAngle;
+	private TextView txtOldAngle;
+	private TextView txtNewAngle;
 
 //	private static final int SAFE_DISTANCE = 64; // in cm
-	private static final int SAFE_DISTANCE =64; // in cm
+	private static final int SAFE_DISTANCE = 64; // in cm
 	private static final int SAFE_DISTANCE_2 = 20; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
 	private static final String TAG = "MA"; // Main Activity
 	// wysy³anie polecen za pomoc¹ manulanego sterowania jest mo¿liwe, to blokuje tylko wysylanie polecen przy akcelerometrze i autonomi	
-	private static final boolean PERM_TO_SEND_COMMAND = true;	
+	private static final boolean PERM_TO_SEND_COMMAND = false;	
 	private static final boolean PERM_TO_GET_DISTANCE_L_AND_R = false; // prawego i lewego czujnika
 
 	private ARDroneAPI drone;
@@ -103,6 +106,12 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private int sensorDistanceFront;
 	private int sensorDistanceRight;
 	private int sensorDistanceLeft;
+	
+	private float yawAngle;
+	private float oldYawAngle;
+	private float newYawAngle;
+	
+	private float dopelnienie;
 
 	private String autonomyLog = "";
 	
@@ -112,6 +121,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		Default, Hover, Forward, Backward, Right, Left, Magneto_Rotate_Right, Magneto_Rotate_Left
 	};
 	private State state = State.Default;
+	
+	private enum Rotate
+	{
+		Default, Rotate_Right, Rotate_Left
+	};
+	private Rotate rotate = Rotate.Default;
+	
 	
 	private final long startTime = 1000 * 5; // 5 sekund
 	private final long interval = 500 * 1;	// 0.5 sekundy
@@ -207,6 +223,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		readBtn = (Button) findViewById(R.id.readBtn);
 		magLeftBtn = (Button) findViewById(R.id.magLeftBtn);
 		magRightBtn = (Button) findViewById(R.id.magRightBtn);
+		txtYawAngle = (TextView) findViewById(R.id.txtYawAngle);
+		txtOldAngle= (TextView) findViewById(R.id.txtOldAngle);
+		txtNewAngle = (TextView) findViewById(R.id.txtNewAngle);
 	}
 
 	private void initListener()
@@ -383,8 +402,25 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					state = State.Default;
 					setPermToAutonomy(true);
 					
+					oldYawAngle = drone.getArdrone().getYawAngle();
+					
 //					myThread = new MyThread();
 //					myThread.start();
+					
+//					new Thread()
+//					{
+//						@Override
+//						public void run()
+//						{
+//							while (true)
+//							{
+//								if (permToAutonomy)
+//								{
+//									sensorDistanceFront = mService.getSensorDistanceFront();														
+//								}	
+//							}
+//						}
+//					}.start();
 
 					new Thread()
 					{
@@ -395,19 +431,20 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 							{
 								if (permToAutonomy)
 								{
-									sensorDistanceFront = mService.getSensorDistanceFront();									
+									sensorDistanceFront = mService.getSensorDistanceFront();	
+									yawAngle = drone.getArdrone().getYawAngle();
 									
 									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy(); albo simpleAutonomy()										
 									autonomy();
 									
 									updateViews();
 
-									if (PERM_TO_GET_DISTANCE_L_AND_R)
-									{
-										sensorDistanceRight = mService.getSensorDistanceRight();
-										sensorDistanceLeft = mService.getSensorDistanceLeft();
-										//holdSafePositionAutonomy();		
-									}																
+//									if (PERM_TO_GET_DISTANCE_L_AND_R)
+//									{
+//										sensorDistanceRight = mService.getSensorDistanceRight();
+//										sensorDistanceLeft = mService.getSensorDistanceLeft();
+//										//holdSafePositionAutonomy();		
+//									}																
 								}								
 								
 							}
@@ -534,7 +571,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	{
 		if (sensorDistanceFront == WRONG_RESULTS_1)
 		{
-			Log.i(TAG, "autonomy(): wrong results");
 			autonomyLog = "wrong results";
 			//hover();
 		}
@@ -556,6 +592,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //						goForward();
 //					}
 				}
+				
+				sensorDistanceFront = mService.getSensorDistanceFront();
 			}
 
 			// Obrót w prawo, wy³¹czaj¹c tego if-a, dron bêdzie lata³ tylko do przodu i do ty³u
@@ -575,7 +613,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					e.printStackTrace();
 				}
 				
-				magnetoRotateRight();
+				checkAndSetHorizon();				
+				//magnetoRotateRight();
 				
 				updateViews();
 				
@@ -876,12 +915,15 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			{
 				txtVFrontSensor.setText("Front: " + String.valueOf(sensorDistanceFront));
 				txtAutonomyLog.setText("Autonomy Log: " + autonomyLog);
+				txtYawAngle.setText("Angle: " + yawAngle);
+				txtOldAngle.setText("Old Angle: " + oldYawAngle);
+				txtNewAngle.setText("New Angle: " + newYawAngle);
 
-				if (PERM_TO_GET_DISTANCE_L_AND_R)
-				{
-					txtVRightSensor.setText("Right: " + String.valueOf(sensorDistanceRight));
-					txtVLeftSensor.setText("Left: " + String.valueOf(sensorDistanceLeft));	
-				}
+//				if (PERM_TO_GET_DISTANCE_L_AND_R)
+//				{
+//					txtVRightSensor.setText("Right: " + String.valueOf(sensorDistanceRight));
+//					txtVLeftSensor.setText("Left: " + String.valueOf(sensorDistanceLeft));	
+//				}
 			}
 		});
 	}
@@ -893,6 +935,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		
 		autonomyLog = "hover";
 		state = State.Hover;
+		
+		newYawAngle = drone.getArdrone().getYawAngle();
 		
 		if(PERM_TO_SEND_COMMAND)
 		{
@@ -1052,7 +1096,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			if(drone != null)
 			{
 				drone.magnetoRotateLeft();
-				drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() - (float) 0.1);
+				//drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() - (float) 0.1);
 								
 				Log.i(TAG, "magnetoRotateLeft()");
 			}
@@ -1084,6 +1128,292 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				Log.i(TAG, "drone=NULL, obiekt nie zosta³ stworzony");
 			}
 		}
+	}
+	
+	private void checkAndSetHorizon()
+	{
+		if(oldYawAngle > 0 && oldYawAngle < 90)
+		{
+			if(rotate == Rotate.Default)
+			{
+				rotate = Rotate.Rotate_Right;
+				magnetoRotateRight();
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				if(newYawAngle > 0 && newYawAngle - oldYawAngle < 90)
+				{					
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				if(oldYawAngle  - newYawAngle < 90)
+				{					
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+			}	
+		}
+		else if (oldYawAngle > 90 && oldYawAngle < 180)
+		{
+			if(rotate == Rotate.Default)
+			{
+				magnetoRotateRight();
+				rotate = Rotate.Rotate_Right;
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				dopelnienie = 180 - oldYawAngle;
+				
+				if(newYawAngle > 0)
+				{ 					
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+				else if(newYawAngle < 0 && ((newYawAngle + 180) + dopelnienie) < 90)
+				{
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				if(newYawAngle < 0)
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else if(newYawAngle > 0 && oldYawAngle - newYawAngle < 90)
+				{					
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+			}
+		}
+		else if (oldYawAngle > -90 && oldYawAngle < 0)
+		{
+			dopelnienie = Math.abs(oldYawAngle);
+			
+			if(rotate == Rotate.Default)
+			{
+				rotate = Rotate.Rotate_Right;
+				magnetoRotateRight();
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				if(dopelnienie + newYawAngle < 90)
+				{ 					
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				if(newYawAngle < 0 && oldYawAngle  - newYawAngle < 90)
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+			}
+		}
+		else if (oldYawAngle < -90 && oldYawAngle > -180)
+		{
+			if(rotate == Rotate.Default)
+			{
+				rotate = Rotate.Rotate_Right;
+				magnetoRotateRight();
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				dopelnienie = Math.abs(oldYawAngle);
+				
+				if(dopelnienie + newYawAngle < 90)
+				{ 					
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				dopelnienie = 180 + oldYawAngle;
+				
+				if(newYawAngle < 0 && oldYawAngle  - newYawAngle < 90)
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else if(newYawAngle > 0 && (180 - newYawAngle) + dopelnienie < 90)
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+					magnetoRotateRight();
+				}
+			}
+		}		
+	}
+	
+	private void checkHorizont()
+	{
+		float oldAngle;
+		float newAngle;
+		float dopelnienie;
+		
+		if(oldYawAngle < 0)
+		{
+			oldAngle = 360f + oldYawAngle;
+			newAngle = 360f + newYawAngle;
+		}
+		else
+		{
+			oldAngle = oldYawAngle;
+			newAngle = newYawAngle;
+		}		
+
+		if(oldAngle > 0 && oldAngle < 90)
+		{
+			if(rotate == Rotate.Default)
+			{
+				magnetoRotateRight();
+				rotate = Rotate.Rotate_Right;
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				if(newAngle - oldAngle < 90)
+				{
+					magnetoRotateRight();
+					rotate = Rotate.Rotate_Right;
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				if(oldAngle  - newAngle < 90)
+				{
+					magnetoRotateLeft();
+					rotate = Rotate.Rotate_Left;
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+				}
+			}	
+		}
+		else if (oldAngle > 90 && oldAngle < 180)
+		{
+			if(rotate == Rotate.Default)
+			{
+				magnetoRotateRight();
+				rotate = Rotate.Rotate_Right;
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				dopelnienie = 180 - oldYawAngle;
+				
+				if(newYawAngle < 0 && (180 - Math.abs(newYawAngle) + dopelnienie < 90 ))
+				{ 
+					magnetoRotateRight();
+					rotate = Rotate.Rotate_Right;
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				if(oldYawAngle  - newYawAngle < 90)
+				{
+					magnetoRotateLeft();
+					rotate = Rotate.Rotate_Left;
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+				}
+			}
+		}
+		else if (oldAngle > -90 && oldAngle < 0)
+		{
+			dopelnienie = Math.abs(oldYawAngle);
+			
+			if(rotate == Rotate.Default)
+			{
+				magnetoRotateRight();
+				rotate = Rotate.Rotate_Right;
+			}
+			else if(rotate == Rotate.Rotate_Right)
+			{
+				if(dopelnienie + newYawAngle < 90)
+				{ 
+					magnetoRotateRight();
+					rotate = Rotate.Rotate_Right;
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Left;
+				}
+			}
+			else if(rotate == Rotate.Rotate_Left)
+			{
+				if(oldYawAngle  - newYawAngle < 90)
+				{
+					magnetoRotateLeft();
+					rotate = Rotate.Rotate_Left;
+				}
+				else
+				{
+					rotate = Rotate.Rotate_Right;
+				}
+			}
+		}
+		else if (oldAngle > -180 && oldAngle < -90)
+		{
+			
+		}		
 	}
 	
 	@Override
