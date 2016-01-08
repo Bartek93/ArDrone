@@ -104,8 +104,8 @@ public class ARDrone
 	static final int NAVDATA_PITCH = 28;
 	static final int NAVDATA_ROLL = 32;
 	static final int NAVDATA_YAW = 36;
-	static final int NAVDATA_ALTITUDE = 40; // wysokosc (pokazuje jak dron lata)	
-	static final int NAVDATA_VX = 44;// pokazuje jak dron lata
+	static final int NAVDATA_ALTITUDE = 40; 			// pokazywane jak dron lata	
+	static final int NAVDATA_VX = 44;					// pokazywane jak dron lata
 	static final int NAVDATA_VY = 48;
 	static final int NAVDATA_VZ = 52;	
 	
@@ -123,7 +123,7 @@ public class ARDrone
 	private float yawAngle;
 	
 	// Parametry do zmian
-	private float speed = (float) 0.07; // 0.05 to raczej minimum
+	private float speed = (float) 0.05; // 0.05 to raczej minimum
 	private float yawSpeed = (float) 0.2;	// 0.2 to raczej minimum
 	private float magneto_psi = (float) 0.1;	// 0.1 to 18 stopni
 	private float magneto_psi_accuracy = (float) 0;
@@ -252,7 +252,8 @@ public class ARDrone
 		return sb.toString();
 	}
 	
-	public static float byteArrayToFloat(byte[] b, int offset) {
+	public static float byteArrayToFloat(byte[] b, int offset) 
+	{
 		return Float.intBitsToFloat(get_int(b, offset));
 	}
 
@@ -269,7 +270,6 @@ public class ARDrone
 			tmp = data[offset + i] & 0xFF;
 			n |= tmp;
 		}
-
 		return n;
 	}
 	
@@ -342,7 +342,6 @@ public class ARDrone
 		}.start();
 
 		/*
-		 * AR.Drone does not send back ack message (like "OK") 
 		 * byte[] buf_rcv = new byte[64]; DatagramPacket packet_rcv = new DatagramPacket(buf_rcv, buf_rcv.length); socket_at.receive(packet_rcv);
 		 * System.out.println(new String(packet_rcv.getData(),0,packet_rcv.getLength()));
 		 */

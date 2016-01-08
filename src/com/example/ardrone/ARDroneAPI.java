@@ -121,7 +121,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd(1, 0, 0, 0, -ardrone.getYawSpeed());
+			ardrone.send_pcmd(1, 0, 0, 0, -0.5f);
 			// ardrone.send_pcmd(1, 0, 0, 0, -1086324736);	// mo¿na wysy³aæ w postaci int32, -1086324736 oznacza, ¿e z prêdkoœci¹ 0.75 max predkosci
 		}
 		catch (Exception e)
@@ -214,7 +214,7 @@ public class ARDroneAPI
 	{
 		try
 		{
-			ardrone.send_pcmd_mag(1, 0, 0, 0, -ardrone.getYawSpeed(), -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
+			ardrone.send_pcmd_mag(1, 0, 0, 0, -0.5f, -ardrone.getMagneto_psi(), ardrone.getMagneto_psi_accuracy());
 		}
 		catch (Exception e)
 		{

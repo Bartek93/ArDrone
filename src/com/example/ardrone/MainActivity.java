@@ -77,14 +77,14 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	private TextView txtNewAngle;
 
 //	private static final int SAFE_DISTANCE = 64; // in cm
-	private static final int SAFE_DISTANCE = 64; // in cm
-	private static final int SAFE_DISTANCE_2 = 20; // in cm
+	private static final int SAFE_DISTANCE = 70; // in cm
+	private static final int SAFE_DISTANCE_2 = 30; // in cm
 	private static final int WRONG_RESULTS_1 = 0;
 	private static final int WRONG_RESULTS_2 = 500;
 	
 	private static final String TAG = "MA"; // Main Activity
 	// wysy³anie polecen za pomoc¹ manulanego sterowania jest mo¿liwe, to blokuje tylko wysylanie polecen przy akcelerometrze i autonomi	
-	private static final boolean PERM_TO_SEND_COMMAND = false;	
+	private static final boolean PERM_TO_SEND_COMMAND = true;	
 	private static final boolean PERM_TO_GET_DISTANCE_L_AND_R = false; // prawego i lewego czujnika
 
 	private ARDroneAPI drone;
@@ -475,7 +475,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //					{
 //						createNewLogFile();
 //					}
-					drone.magnetoSetNorth();
+					//drone.magnetoSetNorth();
 							
 					break;
 				}
@@ -576,6 +576,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		}
 		else
 		{
+			//if (mService.getSensorDistanceFront() > SAFE_DISTANCE)
 			if (sensorDistanceFront > SAFE_DISTANCE)
 			{
 				permToHover = true;
@@ -633,7 +634,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			// musi byæ permToHover bo wtedy przy cofaniu pomiêdzy SAFE_DISTANCE a SAFE_DISTANCE_2 wchodzi³oby zarówno do SAFE_DISTANCE i zatrzyma³by siê jeszcze przed doleglosci¹ SAFE_DISTANCE 
 			if (permToHover)
 			{
-				if (sensorDistanceFront < SAFE_DISTANCE)
+//				if (mService.getSensorDistanceFront() < SAFE_DISTANCE)
+				if (sensorDistanceFront < SAFE_DISTANCE)					
 				{
 					if (state != State.Hover)
 					{						
@@ -642,6 +644,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				}
 			}
 
+			//if (mService.getSensorDistanceFront() < SAFE_DISTANCE_2)
 			if (sensorDistanceFront < SAFE_DISTANCE_2)
 			{
 				if (state != State.Backward)
@@ -913,6 +916,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			@Override
 			public void run()
 			{
+				//txtVFrontSensor.setText("Front: " + String.valueOf(mService.getSensorDistanceFront()));
 				txtVFrontSensor.setText("Front: " + String.valueOf(sensorDistanceFront));
 				txtAutonomyLog.setText("Autonomy Log: " + autonomyLog);
 				txtYawAngle.setText("Angle: " + yawAngle);
@@ -1095,6 +1099,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
 			if(drone != null)
 			{
+				//drone.rotatel();
 				drone.magnetoRotateLeft();
 				//drone.getArdrone().setMagneto_psi(drone.getArdrone().getMagneto_psi() - (float) 0.1);
 								
@@ -1212,6 +1217,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				}
 			}
 		}
+		// tu jest jakis blad
 		else if (oldYawAngle > -90 && oldYawAngle < 0)
 		{
 			dopelnienie = Math.abs(oldYawAngle);
@@ -1237,6 +1243,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			else if(rotate == Rotate.Rotate_Left)
 			{
 				if(newYawAngle < 0 && oldYawAngle  - newYawAngle < 90)
+				{
+					rotate = Rotate.Rotate_Left;
+					magnetoRotateLeft();
+				}
+				else if(newYawAngle > 0 )
 				{
 					rotate = Rotate.Rotate_Left;
 					magnetoRotateLeft();
