@@ -144,7 +144,7 @@
         android:layout_alignBottom="@+id/upBtn"
         android:layout_toLeftOf="@+id/rightBtn"
         android:text="Acc" 
-        android:visibility="invisible"></CheckBox>"
+        android:visibility="visible"></CheckBox>"
 
     <TextView
         android:id="@+id/txtVFrontSensor"
@@ -154,16 +154,6 @@
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/rotateRightBtn"
         android:text="Front:"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/txtVLeftSensor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/landingBtn"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:text="Left: "
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -186,7 +176,7 @@
         android:layout_alignBottom="@+id/accBox"
         android:layout_toLeftOf="@+id/rightBtn"
         android:text="SimpleAut"
-        android:visibility="visible" />
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/txtAutonomyLog"
@@ -267,5 +257,15 @@
         android:layout_toEndOf="@+id/connectBtn"
         android:text="Angle: "
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/txtVLeftSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/forwardBtn"
+        android:layout_alignParentEnd="true"
+        android:layout_alignRight="@+id/rotateRightBtn"
+        android:text="Left: "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

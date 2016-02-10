@@ -2028,7 +2028,7 @@ containing a value of this type.
         public static final int backwardBtn=0x7f0a0053;
         public static final int beginning=0x7f0a001e;
         public static final int buttonPanel=0x7f0a002b;
-        public static final int calibBtn=0x7f0a0067;
+        public static final int calibBtn=0x7f0a0066;
         public static final int cancel_action=0x7f0a006f;
         public static final int checkbox=0x7f0a0039;
         public static final int chronometer=0x7f0a0075;
@@ -2062,8 +2062,8 @@ containing a value of this type.
         public static final int line3=0x7f0a0077;
         public static final int listMode=0x7f0a000a;
         public static final int list_item=0x7f0a0028;
-        public static final int magLeftBtn=0x7f0a0069;
-        public static final int magRightBtn=0x7f0a006a;
+        public static final int magLeftBtn=0x7f0a0068;
+        public static final int magRightBtn=0x7f0a0069;
         public static final int media_actions=0x7f0a0071;
         public static final int middle=0x7f0a0020;
         public static final int multiply=0x7f0a0014;
@@ -2074,7 +2074,7 @@ containing a value of this type.
         public static final int progress_circular=0x7f0a0007;
         public static final int progress_horizontal=0x7f0a0008;
         public static final int radio=0x7f0a003b;
-        public static final int readBtn=0x7f0a0068;
+        public static final int readBtn=0x7f0a0067;
         public static final int rightBtn=0x7f0a005a;
         public static final int rotateLeftBtn=0x7f0a005b;
         public static final int rotateRightBtn=0x7f0a0059;
@@ -2097,7 +2097,7 @@ containing a value of this type.
         public static final int showCustom=0x7f0a0010;
         public static final int showHome=0x7f0a0011;
         public static final int showTitle=0x7f0a0012;
-        public static final int simpleAutBtn=0x7f0a0065;
+        public static final int simpleAutBtn=0x7f0a0064;
         public static final int spacer=0x7f0a002c;
         public static final int split_action_bar=0x7f0a0004;
         public static final int src_atop=0x7f0a0016;
@@ -2115,11 +2115,11 @@ containing a value of this type.
         public static final int title=0x7f0a002a;
         public static final int title_template=0x7f0a002f;
         public static final int topPanel=0x7f0a002e;
-        public static final int txtAutonomyLog=0x7f0a0066;
-        public static final int txtNewAngle=0x7f0a006b;
-        public static final int txtOldAngle=0x7f0a006c;
+        public static final int txtAutonomyLog=0x7f0a0065;
+        public static final int txtNewAngle=0x7f0a006a;
+        public static final int txtOldAngle=0x7f0a006b;
         public static final int txtVFrontSensor=0x7f0a0062;
-        public static final int txtVLeftSensor=0x7f0a0064;
+        public static final int txtVLeftSensor=0x7f0a006c;
         public static final int txtVRightSensor=0x7f0a0063;
         public static final int txtYawAngle=0x7f0a006d;
         public static final int up=0x7f0a0001;

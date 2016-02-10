@@ -103,13 +103,13 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private boolean permToAutonomy = true;
 
-	private int sensorDistanceFront;
-	private int sensorDistanceRight;
-	private int sensorDistanceLeft;
+	private int sensorDistanceFront = 0;
+	private int sensorDistanceRight = 0;
+	private int sensorDistanceLeft = 0;
 	
-	private float yawAngle;
-	private float oldYawAngle;
-	private float newYawAngle;
+	private float yawAngle = 0;
+	private float oldYawAngle = 0;
+	private float newYawAngle = 0;
 	
 	private float dopelnienie;
 
@@ -333,6 +333,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				case R.id.takeOffBtn:
 				{
 					Log.i(TAG, "OnClickListener: takeoff !!!");
+					
+					//if(PERM_TO_SEND_COMMAND)
+					oldYawAngle = drone.getArdrone().getYawAngle();
+					updateViews();
+					
 					drone.takeoff();
 					break;
 				}
@@ -402,7 +407,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					state = State.Default;
 					setPermToAutonomy(true);
 					
-					oldYawAngle = drone.getArdrone().getYawAngle();
+
 					
 //					myThread = new MyThread();
 //					myThread.start();
@@ -432,19 +437,15 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 								if (permToAutonomy)
 								{
 									sensorDistanceFront = mService.getSensorDistanceFront();	
-									yawAngle = drone.getArdrone().getYawAngle();
+									
+									//if(PERM_TO_SEND_COMMAND)
+										yawAngle = drone.getArdrone().getYawAngle();
 									
 									// w³¹czyæ jedn¹ autonomie! albo autonomy() albo holdSafePositionAutonomy(); albo simpleAutonomy()										
 									autonomy();
+									//holdSafePositionAutonomy();
 									
-									updateViews();
-
-//									if (PERM_TO_GET_DISTANCE_L_AND_R)
-//									{
-//										sensorDistanceRight = mService.getSensorDistanceRight();
-//										sensorDistanceLeft = mService.getSensorDistanceLeft();
-//										//holdSafePositionAutonomy();		
-//									}																
+									updateViews();		
 								}								
 								
 							}
@@ -594,7 +595,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 //					}
 				}
 				
-				sensorDistanceFront = mService.getSensorDistanceFront();
+				//sensorDistanceFront = mService.getSensorDistanceFront();
 			}
 
 			// Obrót w prawo, wy³¹czaj¹c tego if-a, dron bêdzie lata³ tylko do przodu i do ty³u
@@ -614,14 +615,16 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					e.printStackTrace();
 				}
 				
-				checkAndSetHorizon();				
-				//magnetoRotateRight();
+				// jeœli rozpoznanie terenu tylko z frontu
+				//checkAndSetHorizon();		
+				// jeœli obrot tylko w prawo
+				magnetoRotateRight(); 
 				
 				updateViews();
 				
 				try
 				{
-					Thread.sleep(600);
+					Thread.sleep(500);
 				}
 				catch (InterruptedException e)
 				{
@@ -634,18 +637,27 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 			// musi byæ permToHover bo wtedy przy cofaniu pomiêdzy SAFE_DISTANCE a SAFE_DISTANCE_2 wchodzi³oby zarówno do SAFE_DISTANCE i zatrzyma³by siê jeszcze przed doleglosci¹ SAFE_DISTANCE 
 			if (permToHover)
 			{
-//				if (mService.getSensorDistanceFront() < SAFE_DISTANCE)
-				if (sensorDistanceFront < SAFE_DISTANCE)					
+				if (mService.getSensorDistanceFront() < SAFE_DISTANCE)
+				//if (sensorDistanceFront < SAFE_DISTANCE)					
 				{
 					if (state != State.Hover)
 					{						
 						hover();
+						
+						try
+						{
+							Thread.sleep(500);
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 
-			//if (mService.getSensorDistanceFront() < SAFE_DISTANCE_2)
-			if (sensorDistanceFront < SAFE_DISTANCE_2)
+			if (mService.getSensorDistanceFront() < SAFE_DISTANCE_2)
+			//if (sensorDistanceFront < SAFE_DISTANCE_2)
 			{
 				if (state != State.Backward)
 				{					
@@ -653,60 +665,6 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 					goBackward();
 				}
 			}
-			
-//			if (state == State.Hover)
-//			{
-//							
-//				
-//				if(drone.getMagneto_psi() == (float) 1.0)
-//				{
-//					magnetoRotateLeft();
-//				}
-//				else
-//				{
-//					magnetoRotateRight();	
-//				}
-//
-//				if (sensorDistanceFront < SAFE_DISTANCE)
-//				{
-//					hover();
-//					try
-//					{
-//						Thread.sleep(1500);
-//					}
-//					catch (InterruptedException e)
-//					{
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-			
-//			if (state == State.Hover)
-//			{
-//				float oldYawAngle = drone.getArdrone().getYawAngle();
-//				
-//				RotateRight();
-//				
-//				float newYawAngle = drone.getArdrone().getYawAngle();
-//					
-//				
-//				if(newYawAngle > oldYawAngle + 25)
-//
-//				if (sensorDistanceFront < SAFE_DISTANCE)
-//				{
-//					hover();
-////					try
-////					{
-////						Thread.sleep(1500);
-////					}
-////					catch (InterruptedException e)
-////					{
-////						e.printStackTrace();
-////					}
-//				}
-//			}
-
-
 		}
 	}
 	//===============================================================================================================================
@@ -719,25 +677,65 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
 	private void holdSafePositionAutonomy()
 	{
-		if(sensorDistanceFront == WRONG_RESULTS_1 || sensorDistanceFront > WRONG_RESULTS_2)
+
+		//if (sensorDistanceFront == WRONG_RESULTS_1 || sensorDistanceRight == WRONG_RESULTS_1)
+		if (mService.getSensorDistanceFront() == WRONG_RESULTS_1)
 		{
-			Log.i(TAG, "autonomy(): wrong results");
-			hover();
-			state = State.Hover;
-			Log.i(TAG, "holdSafePositionAutonomy: hover()");
+			autonomyLog = "wrong results";
+			//hover();
 		}
 		else
 		{
 			holdSafeFrontPosition();
 			holdSafeRightPosition();
 			holdSafeLeftPosition();
+			
+//			sensorDistanceFront = mService.getSensorDistanceFront();
+//			sensorDistanceRight = mService.getSensorDistanceRight();
+//			sensorDistanceLeft = mService.getSensorDistanceLeft();
+//			
+//			if (sensorDistanceFront < SAFE_DISTANCE)
+//			{
+//				if (state != State.Backward)
+//				{
+//					Log.d(TAG, "holdSafeFrontPosition(): goBackward");
+//					//drone.goBackward();
+//					goBackward();
+//				}
+//			}
+//			else if (sensorDistanceRight < SAFE_DISTANCE)
+//			{
+//				if (state != State.Left)
+//				{
+//					Log.d(TAG, "holdSafeRightPosition(): goLeft");
+//					goLeft();
+//				}
+//			}
+//			else if (sensorDistanceLeft < SAFE_DISTANCE)
+//			{
+//				if (state != State.Right)
+//				{
+//					Log.d(TAG, "holdSafeLeftPosition(): goRight");
+//					goRight();
+//				}
+//			}
+			
 
 			checkIfIsSafe();
+			try
+			{
+				Thread.sleep(200);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private void holdSafeFrontPosition()
 	{
+		sensorDistanceFront = mService.getSensorDistanceFront();
 		if (sensorDistanceFront < SAFE_DISTANCE)
 		{
 			if (state != State.Backward)
@@ -745,27 +743,29 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				Log.d(TAG, "holdSafeFrontPosition(): goBackward");
 				//drone.goBackward();
 				goBackward();
-				state = State.Backward;
 			}
 		}
 	}
 
 	private void holdSafeRightPosition()
 	{
+		
+//		if (sensorDistanceRight < SAFE_DISTANCE)
+		sensorDistanceRight = mService.getSensorDistanceRight();
 		if (sensorDistanceRight < SAFE_DISTANCE)
 		{
 			if (state != State.Left)
 			{
 				Log.d(TAG, "holdSafeRightPosition(): goLeft");
-				//drone.goLeft();
 				goLeft();
-				state = State.Left;
 			}
 		}
 	}
 
 	private void holdSafeLeftPosition()
 	{
+		sensorDistanceLeft = mService.getSensorDistanceLeft();
+//		if (sensorDistanceLeft < SAFE_DISTANCE)
 		if (sensorDistanceLeft < SAFE_DISTANCE)
 		{
 			if (state != State.Right)
@@ -773,41 +773,54 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				Log.d(TAG, "holdSafeLeftPosition(): goRight");
 				///drone.goRight();
 				goRight();
-				state = State.Right;
 			}
 		}
 	}
 
 	private void checkIfIsSafe()
 	{
+//		sensorDistanceFront = mService.getSensorDistanceFront();
+//		sensorDistanceRight = mService.getSensorDistanceRight();
+//		sensorDistanceLeft = mService.getSensorDistanceLeft();
+//		
+//		if (sensorDistanceFront > SAFE_DISTANCE)
+//		{				
+//			hover();
+//		}
+//		else if (sensorDistanceRight > SAFE_DISTANCE)
+//		{
+//			hover();
+//		}
+//		else if (sensorDistanceLeft > SAFE_DISTANCE)
+//		{
+//			hover();
+//		}
+		
 		if (state == State.Backward)
 		{
+			sensorDistanceFront = mService.getSensorDistanceFront();
 			if (sensorDistanceFront > SAFE_DISTANCE)
-			{
+			{				
 				Log.d(TAG, "checkIfIsSafe(): Hover");
-				//drone.hovering();
 				hover();
-				state = State.Hover;
 			}
 		}
 		else if (state == State.Left)
 		{
+			sensorDistanceRight = mService.getSensorDistanceRight();
 			if (sensorDistanceRight > SAFE_DISTANCE)
 			{
 				Log.d(TAG, "checkIfIsSafe(): Hover");
-				//drone.hovering();
 				hover();
-				state = State.Hover;
 			}
 		}
 		else if (state == State.Right)
 		{
+			sensorDistanceLeft = mService.getSensorDistanceLeft();
 			Log.d(TAG, "checkIfIsSafe(): Hover");
 			if (sensorDistanceLeft > SAFE_DISTANCE)
 			{
-				//drone.hovering();
 				hover();
-				state = State.Hover;
 			}
 		}
 	}
@@ -923,11 +936,11 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 				txtOldAngle.setText("Old Angle: " + oldYawAngle);
 				txtNewAngle.setText("New Angle: " + newYawAngle);
 
-//				if (PERM_TO_GET_DISTANCE_L_AND_R)
-//				{
-//					txtVRightSensor.setText("Right: " + String.valueOf(sensorDistanceRight));
-//					txtVLeftSensor.setText("Left: " + String.valueOf(sensorDistanceLeft));	
-//				}
+				if (PERM_TO_GET_DISTANCE_L_AND_R)
+				{
+					txtVRightSensor.setText("Right: " + String.valueOf(sensorDistanceRight));
+					txtVLeftSensor.setText("Left: " + String.valueOf(sensorDistanceLeft));	
+				}
 			}
 		});
 	}
@@ -940,7 +953,8 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		autonomyLog = "hover";
 		state = State.Hover;
 		
-		newYawAngle = drone.getArdrone().getYawAngle();
+		//if(PERM_TO_SEND_COMMAND)
+			newYawAngle = drone.getArdrone().getYawAngle();
 		
 		if(PERM_TO_SEND_COMMAND)
 		{
@@ -1004,6 +1018,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private void goRight()
 	{
+		autonomyLog = "goRight";
+		state = State.Right;
+		
 		if(PERM_TO_SEND_COMMAND)
 		{
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
@@ -1021,6 +1038,9 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 	
 	private void goLeft()
 	{
+		autonomyLog = "goLeft";
+		state = State.Left;
+		
 		if(PERM_TO_SEND_COMMAND)
 		{
 			Log.i(TAG, "PERM_TO_SEND_COMMAND = true");
@@ -1112,7 +1132,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 		}
 	}
 	
-	private void RotateRight()
+	private void rotateRight()
 	{
 		Log.d(TAG, "autonomy(): RotateRight");
 		

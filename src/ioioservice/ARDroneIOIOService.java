@@ -18,7 +18,7 @@ import ioio.lib.util.android.IOIOService;
 
 public class ARDroneIOIOService extends IOIOService
 {
-	private static final int SLEEP_TIME = 80;
+	private static final int SLEEP_TIME = 20;	// 80
 	
 	private final IBinder mBinder = new LocalBinder();
 	
@@ -89,12 +89,12 @@ public class ARDroneIOIOService extends IOIOService
 				
 				if(PERM_TO_GET_DISTANCE_L_AND_R)
 				{					
-					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(6), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-					triggerPin_2 = ioio_.openDigitalOutput(7);
+					echoPin_2 = ioio_.openPulseInput(new DigitalInput.Spec(11), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+					triggerPin_2 = ioio_.openDigitalOutput(12);
 					
 					
-					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(12), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
-					triggerPin_3 = ioio_.openDigitalOutput(11);
+					echoPin_3 = ioio_.openPulseInput(new DigitalInput.Spec(6), PulseInput.ClockRate.RATE_250KHz, PulseInput.PulseMode.POSITIVE, false);
+					triggerPin_3 = ioio_.openDigitalOutput(7);
 				}								
 			}
 
@@ -140,7 +140,7 @@ public class ARDroneIOIOService extends IOIOService
 					echoSecondsSensorLeft = (int) (echoPin_3.getDuration() * 1000 * 1000);
 					echoDistanceCmSensorLeft = echoSecondsSensorLeft / 58;
 					sensorDistanceLeft = echoDistanceCmSensorLeft;
-					//Log.d("IOIOSensor", "Odleglosc sensorLeft:" + sensorDistanceLeft);
+					Log.d("IOIOSensor", "Odleglosc sensorLeft:" + sensorDistanceLeft);
 				}
 
 				Thread.sleep(SLEEP_TIME);
